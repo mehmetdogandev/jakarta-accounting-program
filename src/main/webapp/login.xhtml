@@ -1,0 +1,20 @@
+<ui:composition template="/template.xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html">
+    <ui:define name="mainContent">
+        <h:form>
+            <div class="container">
+                <h:messages styleClass="alert alert-danger" globalOnly="true"/>
+                <div class="form-group">
+                    <label for="InputUserName">Username</label>
+                    <h:inputText styleClass="input-group" value="#{loginBean.user.email}"/>
+                </div>
+                <div class="form-group">
+                    <label for="InputPass">Password</label>
+                    <h:inputSecret styleClass="input-group" value="#{loginBean.user.password}"/>
+                </div>
+                <h:commandButton styleClass="btn btn-success" value="LOGIN" action="#{loginBean.login()}"/>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>

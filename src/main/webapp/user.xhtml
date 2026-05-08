@@ -1,0 +1,36 @@
+<ui:composition template="/template.xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html">
+    <ui:define name="mainContent">
+        <div class="container">
+            <h:form>
+                <div class="form-floating mb-3">
+                    <h:inputText styleClass="form-control" id="name" value="#{userBean.user.name}"/>
+                    <label for="name" class="form-label">Name</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <h:inputText styleClass="form-control" id="surname" value="#{userBean.user.surname}"/>
+                    <label for="surname" class="form-label">Surname</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <h:inputText styleClass="form-control" id="email" value="#{userBean.user.email}"/>
+                    <label for="email" class="form-label">email</label>
+                </div>
+                <h:panelGroup styleClass="form-floating mb-3" rendered="#{userBean.user.id==null}">
+                    <h:inputText styleClass="form-control" id="password" value="#{userBean.user.password}"/>
+                    <label for="password" class="form-label">password</label>
+                </h:panelGroup>
+                <h:commandButton styleClass="btn btn-primary" rendered="#{userBean.user.id==null}" value="Kaydet" action="#{userBean.createUser()}"/>
+                <h:commandButton styleClass="btn btn-success" rendered="#{userBean.user.id!=null}" value="Güncelle" action="#{userBean.editUser()}"/>
+                <h:commandButton styleClass="btn btn-warning" rendered="#{userBean.user.id!=null}" value="Formu Temizle" action="#{userBean.clearForm()}"/>
+
+            </h:form>
+        </div>
+        <hr/>
+        <h:form>
+            <ui:repeat value="#{userBean.users}" var="u">
+                #{u.name}-#{u.surname} <h:commandButton action="#{userBean.updateForm(u)}" value="Edit"/> <h:commandButton action="#{userBean.deleteUser(u)}" value="Delete"/> <br/>
+            </ui:repeat>
+        </h:form>
+    </ui:define>
+</ui:composition>

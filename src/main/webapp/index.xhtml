@@ -1,0 +1,8 @@
+<ui:composition template="/template.xhtml"
+                xmlns:ui="jakarta.faces.facelets">
+    <ui:define name="mainContent">
+        <ui:repeat value="#{frontendBean.users}" var="u">
+            #{u.name}-#{u.surname} <br/>
+        </ui:repeat>
+    </ui:define>
+</ui:composition>
