@@ -1,6 +1,6 @@
 package bean;
 
-import entity.Users;
+import entity.AppUser;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 
@@ -12,30 +12,35 @@ import java.util.List;
 @Named
 @ViewScoped
 public class FrontendBean implements Serializable {
+
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private Users user;
-    private List<Users> users;
+    private AppUser user;
+    private List<AppUser> users;
 
-    public Users getUser() {
+    public AppUser getUser() {
         return user;
     }
 
-    public void setUser(Users user) {
+    public void setUser(AppUser user) {
         this.user = user;
     }
 
-    public List<Users> getUsers() {
+    public List<AppUser> getUsers() {
         users = new ArrayList<>();
-        users.add(new Users(1L,"A","B","C","D"));
-        users.add(new Users(2L,"A","B","C","D"));
-        users.add(new Users(3L,"A","B","C","D"));
-        users.add(new Users(4L,"A","B","C","D"));
+        for (int i = 1; i <= 4; i++) {
+            AppUser u = new AppUser();
+            u.setId("demo-" + i);
+            u.setEmail("user" + i + "@example.com");
+            u.setName("A");
+            u.setSurname("B");
+            users.add(u);
+        }
         return users;
     }
 
-    public void setUsers(List<Users> users) {
+    public void setUsers(List<AppUser> users) {
         this.users = users;
     }
 }

@@ -16,15 +16,18 @@ public class SessionFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) resp;
 
-        String loginURI = request.getContextPath() + "/login";
-        String loggedURI = request.getContextPath() + "/panel/index";
+        String ctx = request.getContextPath();
+        String loginPath = ctx + "/login";
+        String panelPath = ctx + "/panel/index";
 
-        boolean loggedIn = request.getSession().getAttribute("user") != null;
-        boolean loginRequest = request.getRequestURI().equals(loginURI);
+        boolean loggedIn = request.getSession().getAttribute("user") != null
+                || request.getSession().getAttribute("userId") != null;
+        String uri = request.getRequestURI();
+        boolean loginRequest = uri.equals(loginPath) || uri.equals(ctx + "/login.xhtml");
 
         if (loggedIn || loginRequest) {
             if (loginRequest && loggedIn) {
-                response.sendRedirect(loggedURI);
+                response.sendRedirect(panelPath + ".xhtml");
             } else {
                 chain.doFilter(request, response);
             }
@@ -34,9 +37,9 @@ public class SessionFilter implements Filter {
                 response.setCharacterEncoding("UTF-8");
                 response.getWriter()
                         .write("<?xml version='1.0' encoding='UTF-8'?>"
-                                + "<partial-response><redirect url='" + loginURI + "'/></partial-response>");
+                                + "<partial-response><redirect url='" + loginPath + ".xhtml'/></partial-response>");
             } else {
-                response.sendRedirect(loginURI);
+                response.sendRedirect(loginPath + ".xhtml");
             }
         }
     }

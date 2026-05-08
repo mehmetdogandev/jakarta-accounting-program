@@ -11,7 +11,7 @@ public class Student  implements Serializable {
     private Long id;
     private String studentNumber;
     @ManyToOne
-    private Users user;
+    private AppUser user;
 
     public Long getId() {
         return id;
@@ -29,11 +29,11 @@ public class Student  implements Serializable {
         this.studentNumber = studentNumber;
     }
 
-    public Users getUser() {
+    public AppUser getUser() {
         return user;
     }
 
-    public void setUser(Users user) {
+    public void setUser(AppUser user) {
         this.user = user;
     }
 }

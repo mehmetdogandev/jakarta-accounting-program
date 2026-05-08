@@ -1,6 +1,6 @@
 package bean;
 
-import entity.Users;
+import entity.AppUser;
 import facadeLocal.UserFacadeLocal;
 import jakarta.ejb.EJB;
 import jakarta.faces.application.FacesMessage;
@@ -14,36 +14,39 @@ import java.io.Serializable;
 @Named
 @ViewScoped
 public class LoginBean implements Serializable {
-    private Users user;
-    @EJB
-    UserFacadeLocal userFacade;
-    @Inject
-    FacesContext facesContext;
 
+    private AppUser user;
+
+    @EJB
+    private UserFacadeLocal userFacade;
+
+    @Inject
+    private FacesContext facesContext;
 
     public String login() {
         String email = user.getEmail() != null ? user.getEmail().trim() : null;
         String password = user.getPassword();
 
-        Users u = userFacade.login(email, password);
+        AppUser u = userFacade.login(email, password);
         if (u != null) {
-            facesContext.getExternalContext().getSessionMap().put("user", u);
+            var session = facesContext.getExternalContext().getSessionMap();
+            session.put("user", u);
+            session.put("userId", u.getId());
             return "/panel/index.xhtml?faces-redirect=true";
-        } else {
-            FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Login failed", "Email veya parola hatali.");
-            facesContext.addMessage(null, msg);
-            return null;
         }
+        FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Login failed", "Email veya parola hatali.");
+        facesContext.addMessage(null, msg);
+        return null;
     }
 
-    public Users getUser() {
+    public AppUser getUser() {
         if (user == null) {
-            user = new Users();
+            user = new AppUser();
         }
         return user;
     }
 
-    public void setUser(Users user) {
+    public void setUser(AppUser user) {
         this.user = user;
     }
 }

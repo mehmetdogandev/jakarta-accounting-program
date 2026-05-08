@@ -1,12 +1,29 @@
 <!DOCTYPE html>
-<html lang="en"
+<html lang="tr"
       xmlns="http://www.w3.org/1999/xhtml"
       xmlns:f="jakarta.faces.core"
       xmlns:h="jakarta.faces.html">
 <f:view>
-    <h:head>PANEL</h:head>
+    <h:head>
+        <title>Panel</title>
+    </h:head>
     <h:body>
-        PANEL
+        <h1>Muhasebe paneli</h1>
+        <p>
+            <h:outputText value="READ izni: #{panelBean.canReadDashboard ? 'evet' : 'hayır'}"/>
+        </p>
+        <p>
+            <h:outputText value="ACCESS izni: #{panelBean.canAccessPanel ? 'evet' : 'hayır'}"/>
+        </p>
+        <p>
+            <h:outputText value="READ + USER scope: #{panelBean.canReadAsUserScope ? 'evet' : 'hayır'}"/>
+        </p>
+        <h:panelGroup rendered="#{not panelBean.canReadDashboard}">
+            <p>Bu içerik READ yetkisi olmadan gösterilmez (örnek guard).</p>
+        </h:panelGroup>
+        <h:panelGroup rendered="#{panelBean.canReadDashboard}">
+            <p>Dashboard içeriği (READ ile korunmuş).</p>
+        </h:panelGroup>
     </h:body>
 </f:view>
 </html>

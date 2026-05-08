@@ -1,15 +1,20 @@
 package facadeLocal;
 
-import entity.Users;
+import entity.AppUser;
 import jakarta.ejb.Local;
 
 import java.util.List;
 
 @Local
 public interface UserFacadeLocal {
-    void createUser(Users entity);
-    Users editUser(Users entity);
-    void remove(Users entity);
-    List<Users> usersList();
-    Users login(String email, String password);
+
+    void createUser(AppUser entity);
+
+    AppUser editUser(AppUser entity);
+
+    void remove(AppUser entity);
+
+    List<AppUser> usersList();
+
+    AppUser login(String email, String password);
 }
