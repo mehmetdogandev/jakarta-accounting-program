@@ -1,0 +1,55 @@
+# Yalnızca Postgres + Flyway (MODE=development / yerel Payara ile çalışma).
+# Kullanım: docker compose -f docker-compose.dev.yaml up -d
+
+services:
+  postgres:
+    image: postgres:17.6
+    command:
+      [
+        "postgres",
+        "-c",
+        "max_connections=300",
+        "-c",
+        "shared_buffers=256MB",
+      ]
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-accounting}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  flyway:
+    image: flyway/flyway:11
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-accounting}
+      FLYWAY_USER: ${POSTGRES_USER:-postgres}
+      FLYWAY_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql
+      FLYWAY_CONNECT_RETRIES: 10
+    volumes:
+      - ./src/main/resources/db/migration:/flyway/sql:ro
+    command: migrate
+    networks:
+      - app-network
+    restart: "no"
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

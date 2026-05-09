@@ -14,6 +14,9 @@
                     <h:inputSecret styleClass="input-group" value="#{loginBean.user.password}"/>
                 </div>
                 <h:commandButton styleClass="btn btn-success" value="LOGIN" action="#{loginBean.login()}"/>
+                <div class="mt-2">
+                    <h:link outcome="/register" value="Kayıt ol"/>
+                </div>
             </div>
         </h:form>
     </ui:define>

@@ -1,0 +1,33 @@
+<ui:composition template="/template.xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core">
+    <ui:define name="mainContent">
+        <h:form>
+            <div class="container" style="max-width:420px">
+                <h:messages globalOnly="true" infoClass="alert alert-success" errorClass="alert alert-danger"/>
+                <h2 class="mb-3">Kayıt ol</h2>
+                <div class="mb-3">
+                    <label class="form-label">E-posta</label>
+                    <h:inputText styleClass="form-control" value="#{registerBean.user.email}" required="true"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Şifre</label>
+                    <h:inputSecret styleClass="form-control" value="#{registerBean.user.password}" required="true"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Ad</label>
+                    <h:inputText styleClass="form-control" value="#{registerBean.user.name}"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Soyad</label>
+                    <h:inputText styleClass="form-control" value="#{registerBean.user.surname}"/>
+                </div>
+                <h:commandButton styleClass="btn btn-primary w-100 mb-2" value="Kayıt ol" action="#{registerBean.register()}"/>
+                <div class="text-center">
+                    <h:link outcome="/login" value="Girişe dön"/>
+                </div>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>

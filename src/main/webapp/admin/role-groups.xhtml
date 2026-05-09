@@ -1,0 +1,72 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/admin.xhtml">
+
+    <ui:define name="title">Rol grupları</ui:define>
+
+    <ui:define name="content">
+        <h:form id="mainForm">
+            <p:messages id="msgs" showDetail="true" closable="true"/>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="h4 mb-0">Rol grupları</h1>
+                <p:commandButton value="Ekle" icon="pi pi-plus" styleClass="ui-button-success"
+                                 actionListener="#{adminRoleGroupsBean.openNew}"
+                                 update="mainForm"
+                                 rendered="#{rbac.can('ROLE_GROUP','CREATE')}"
+                                 oncomplete="PF('rgDlg').show()"/>
+            </div>
+
+            <p:dataTable value="#{adminRoleGroupsBean.groups}" var="g" paginator="true" rows="10" emptyMessage="Kayıt yok">
+                <p:column headerText="Başlık">
+                    <h:outputText value="#{g.title}"/>
+                </p:column>
+                <p:column headerText="Açıklama">
+                    <h:outputText value="#{g.description}"/>
+                </p:column>
+                <p:column headerText="İşlemler" style="width:200px">
+                    <p:commandButton icon="pi pi-pencil" title="Düzenle"
+                                     actionListener="#{adminRoleGroupsBean.openEdit(g)}"
+                                     update="mainForm"
+                                     rendered="#{rbac.can('ROLE_GROUP','UPDATE')}"
+                                     oncomplete="PF('rgDlg').show()"/>
+                    <p:commandButton icon="pi pi-trash" title="Sil" styleClass="ui-button-danger ms-1"
+                                     actionListener="#{adminRoleGroupsBean.softDelete(g)}"
+                                     update="mainForm"
+                                     rendered="#{rbac.can('ROLE_GROUP','DELETE')}">
+                        <p:confirm header="Onay" message="Grup soft-delete ile kaldırılsın mı?" icon="pi pi-exclamation-triangle"/>
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+
+            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade"/>
+
+            <p:dialog id="rgDlg" header="Rol grubu" widgetVar="rgDlg" modal="true" appendTo="@body" dynamic="true" width="560">
+                <h:panelGroup rendered="#{adminRoleGroupsBean.editGroup != null}">
+                    <div class="mb-2">
+                        <label class="form-label">Başlık</label>
+                        <p:inputText value="#{adminRoleGroupsBean.editGroup.title}" styleClass="form-control w-100"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Açıklama</label>
+                        <p:inputTextarea value="#{adminRoleGroupsBean.editGroup.description}" rows="3" styleClass="form-control w-100"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Roller</label>
+                        <p:selectManyCheckbox id="rolesPick" value="#{adminRoleGroupsBean.selectedRoles}" layout="grid" columns="2">
+                            <f:selectItems value="#{adminRoleGroupsBean.assignableRoles}" var="role"
+                                           itemValue="#{role}" itemLabel="#{role.name} (#{role.scope})"/>
+                        </p:selectManyCheckbox>
+                    </div>
+                    <p:commandButton value="Kaydet" icon="pi pi-check" action="#{adminRoleGroupsBean.save}"
+                                     update="mainForm" process="@form"/>
+                    <p:commandButton value="İptal" icon="pi pi-times" type="button" styleClass="ui-button-secondary ms-2"
+                                     onclick="PF('rgDlg').hide()"/>
+                </h:panelGroup>
+            </p:dialog>
+        </h:form>
+    </ui:define>
+</ui:composition>

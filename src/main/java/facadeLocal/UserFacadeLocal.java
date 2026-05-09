@@ -17,4 +17,10 @@ public interface UserFacadeLocal {
     List<AppUser> usersList();
 
     AppUser login(String email, String password);
+
+    AppUser findById(String id);
+
+    boolean emailExists(String email, String excludeUserId);
+
+    void softDeleteUser(String targetUserId, String actorUserId);
 }

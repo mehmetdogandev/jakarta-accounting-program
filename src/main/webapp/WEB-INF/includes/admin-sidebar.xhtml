@@ -1,0 +1,25 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets">
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <h:link outcome="/admin/dashboard" styleClass="btn btn-link p-0 mb-2">Ana sayfa</h:link>
+            <div class="mt-2">
+                <a class="btn btn-outline-secondary w-100 text-start" data-bs-toggle="collapse" href="#sysMgmt"
+                   role="button" aria-expanded="true" aria-controls="sysMgmt">
+                    Sistem Yönetimi
+                </a>
+                <div class="collapse show mt-2 ps-2 border-start" id="sysMgmt">
+                    <h:link outcome="/admin/users" styleClass="d-block py-1"
+                            rendered="#{rbac.can('USER','ACCESS')}">Kullanıcılar</h:link>
+                    <h:link outcome="/admin/roles" styleClass="d-block py-1"
+                            rendered="#{rbac.can('ROLE','ACCESS')}">Roller</h:link>
+                    <h:link outcome="/admin/role-groups" styleClass="d-block py-1"
+                            rendered="#{rbac.can('ROLE_GROUP','ACCESS')}">Rol grupları</h:link>
+                </div>
+            </div>
+        </div>
+    </div>
+</ui:composition>

@@ -1,0 +1,68 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/admin.xhtml">
+
+    <ui:define name="title">Roller</ui:define>
+
+    <ui:define name="content">
+        <h:form id="mainForm">
+            <p:messages id="msgs" showDetail="true" closable="true"/>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="h4 mb-0">Roller (ROLE)</h1>
+                <p:commandButton value="Ekle" icon="pi pi-plus" styleClass="ui-button-success"
+                                 actionListener="#{adminRolesBean.openNew}"
+                                 update="mainForm"
+                                 rendered="#{rbac.can('ROLE','CREATE')}"
+                                 oncomplete="PF('roleDlg').show()"/>
+            </div>
+
+            <p:dataTable value="#{adminRolesBean.roles}" var="r" paginator="true" rows="10" emptyMessage="Kayıt yok">
+                <p:column headerText="Ad">
+                    <h:outputText value="#{r.name}"/>
+                </p:column>
+                <p:column headerText="Scope">
+                    <h:outputText value="#{r.scope}"/>
+                </p:column>
+                <p:column headerText="İşlemler" style="width:200px">
+                    <p:commandButton icon="pi pi-pencil" title="Düzenle"
+                                     actionListener="#{adminRolesBean.openEdit(r)}"
+                                     update="mainForm"
+                                     rendered="#{rbac.can('ROLE','UPDATE')}"
+                                     oncomplete="PF('roleDlg').show()"/>
+                    <p:commandButton icon="pi pi-trash" title="Sil" styleClass="ui-button-danger ms-1"
+                                     actionListener="#{adminRolesBean.softDelete(r)}"
+                                     update="mainForm"
+                                     rendered="#{rbac.can('ROLE','DELETE')}">
+                        <p:confirm header="Onay" message="Rol soft-delete ile kaldırılsın mı?" icon="pi pi-exclamation-triangle"/>
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+
+            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade"/>
+
+            <p:dialog id="roleDlg" header="Rol" widgetVar="roleDlg" modal="true" appendTo="@body" dynamic="true" width="520">
+                <h:panelGroup rendered="#{adminRolesBean.editRole != null}">
+                    <div class="mb-2">
+                        <label class="form-label">Ad</label>
+                        <p:inputText value="#{adminRolesBean.editRole.name}" styleClass="form-control w-100"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">İzinler</label>
+                        <p:selectManyCheckbox id="perms" value="#{adminRolesBean.selectedPermissions}" layout="grid" columns="3">
+                            <f:selectItems value="#{adminRolesBean.permissionOptions}" var="perm"
+                                           itemValue="#{perm}" itemLabel="#{perm.name()}"/>
+                        </p:selectManyCheckbox>
+                    </div>
+                    <p:commandButton value="Kaydet" icon="pi pi-check" action="#{adminRolesBean.save}"
+                                     update="mainForm" process="@form"/>
+                    <p:commandButton value="İptal" icon="pi pi-times" type="button" styleClass="ui-button-secondary ms-2"
+                                     onclick="PF('roleDlg').hide()"/>
+                </h:panelGroup>
+            </p:dialog>
+        </h:form>
+    </ui:define>
+</ui:composition>

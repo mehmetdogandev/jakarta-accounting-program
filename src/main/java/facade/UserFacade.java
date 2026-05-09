@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 
+import java.time.Instant;
 import java.util.List;
 
 @Stateless
@@ -57,6 +58,39 @@ public class UserFacade extends AbstractFacade implements UserFacadeLocal {
         if (found.isEmpty()) {
             return null;
         }
-        return found.getFirst();
+        return found.get(0);
+    }
+
+    @Override
+    public AppUser findById(String id) {
+        return this.entityManager.find(AppUser.class, id);
+    }
+
+    @Override
+    public boolean emailExists(String email, String excludeUserId) {
+        String jpql = "SELECT COUNT(u) FROM AppUser u WHERE u.email = :e AND u.deletedAt IS NULL";
+        if (excludeUserId != null && !excludeUserId.isBlank()) {
+            jpql += " AND u.id <> :ex";
+        }
+        var q = this.entityManager.createQuery(jpql, Long.class).setParameter("e", email);
+        if (excludeUserId != null && !excludeUserId.isBlank()) {
+            q.setParameter("ex", excludeUserId);
+        }
+        Long count = q.getSingleResult();
+        return count != null && count > 0;
+    }
+
+    @Override
+    public void softDeleteUser(String targetUserId, String actorUserId) {
+        AppUser u = findById(targetUserId);
+        if (u == null || u.getDeletedAt() != null) {
+            return;
+        }
+        Instant now = Instant.now();
+        u.setDeletedAt(now);
+        u.setDeletedBy(actorUserId);
+        u.setLastUpdatedBy(actorUserId);
+        this.entityManager.merge(u);
+        this.entityManager.flush();
     }
 }

@@ -1,0 +1,79 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/admin.xhtml">
+
+    <ui:define name="title">Kullanıcılar</ui:define>
+
+    <ui:define name="content">
+        <h:form id="mainForm">
+            <p:messages id="msgs" showDetail="true" closable="true"/>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h1 class="h4 mb-0">Kullanıcılar</h1>
+                <p:commandButton value="Ekle" icon="pi pi-plus" styleClass="ui-button-success"
+                                 actionListener="#{adminUsersBean.openNew}"
+                                 update="mainForm"
+                                 rendered="#{rbac.can('USER','CREATE')}"
+                                 oncomplete="PF('userDlg').show()"/>
+            </div>
+
+            <p:dataTable id="tbl" value="#{adminUsersBean.users}" var="u" paginator="true" rows="10"
+                         emptyMessage="Kayıt yok">
+                <p:column headerText="E-posta">
+                    <h:outputText value="#{u.email}"/>
+                </p:column>
+                <p:column headerText="Ad">
+                    <h:outputText value="#{u.name}"/>
+                </p:column>
+                <p:column headerText="Soyad">
+                    <h:outputText value="#{u.surname}"/>
+                </p:column>
+                <p:column headerText="İşlemler" style="width:200px">
+                    <p:commandButton icon="pi pi-pencil" title="Düzenle"
+                                     actionListener="#{adminUsersBean.openEdit(u)}"
+                                     update="mainForm"
+                                     rendered="#{rbac.can('USER','UPDATE')}"
+                                     oncomplete="PF('userDlg').show()"/>
+                    <p:commandButton icon="pi pi-trash" title="Sil"
+                                     styleClass="ui-button-danger ms-1"
+                                     actionListener="#{adminUsersBean.softDelete(u)}"
+                                     update="mainForm"
+                                     rendered="#{rbac.can('USER','DELETE')}">
+                        <p:confirm header="Onay" message="Kullanıcı soft-delete ile kaldırılsın mı?" icon="pi pi-exclamation-triangle"/>
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+
+            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade"/>
+
+            <p:dialog id="userDlg" header="Kullanıcı" widgetVar="userDlg" modal="true" appendTo="@body"
+                      dynamic="true" width="480">
+                <h:panelGroup rendered="#{adminUsersBean.editUser != null}">
+                    <div class="mb-2">
+                        <label class="form-label">E-posta</label>
+                        <p:inputText value="#{adminUsersBean.editUser.email}" styleClass="form-control w-100"/>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Şifre</label>
+                        <p:password value="#{adminUsersBean.editUser.password}" styleClass="form-control w-100" redisplay="true"/>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Ad</label>
+                        <p:inputText value="#{adminUsersBean.editUser.name}" styleClass="form-control w-100"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Soyad</label>
+                        <p:inputText value="#{adminUsersBean.editUser.surname}" styleClass="form-control w-100"/>
+                    </div>
+                    <p:commandButton value="Kaydet" icon="pi pi-check" action="#{adminUsersBean.save}"
+                                     update="mainForm" process="@form"/>
+                    <p:commandButton value="İptal" icon="pi pi-times" type="button" styleClass="ui-button-secondary ms-2"
+                                     onclick="PF('userDlg').hide()"/>
+                </h:panelGroup>
+            </p:dialog>
+        </h:form>
+    </ui:define>
+</ui:composition>

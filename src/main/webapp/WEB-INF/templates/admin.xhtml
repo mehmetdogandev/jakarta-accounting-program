@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:p="http://primefaces.org/ui">
+<f:view>
+    <h:head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title><ui:insert name="title">Admin</ui:insert></title>
+        <h:outputStylesheet library="css" name="bootstrap.min.css"/>
+        <h:outputScript library="js" name="bootstrap.bundle.min.js"/>
+    </h:head>
+    <h:body styleClass="bg-light">
+        <div class="container-fluid py-3">
+            <div class="row">
+                <nav class="col-md-3 col-lg-2 mb-3">
+                    <ui:include src="/WEB-INF/includes/admin-sidebar.xhtml"/>
+                </nav>
+                <main class="col-md-9 col-lg-10">
+                    <ui:insert name="content"/>
+                </main>
+            </div>
+        </div>
+    </h:body>
+</f:view>
+</html>

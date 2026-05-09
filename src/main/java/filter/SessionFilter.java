@@ -7,7 +7,12 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebFilter(filterName = "SessionFilter", urlPatterns = {"/panel/*", "/app/*"})
+@WebFilter(
+        filterName = "SessionFilter",
+        urlPatterns = {
+                "/panel/*", "/app/*", "/admin/*",
+                "/login", "/login.xhtml", "/register", "/register.xhtml"
+        })
 public class SessionFilter implements Filter {
 
     @Override
@@ -18,20 +23,25 @@ public class SessionFilter implements Filter {
 
         String ctx = request.getContextPath();
         String loginPath = ctx + "/login";
-        String panelPath = ctx + "/panel/index";
+        String registerPath = ctx + "/register";
+        String dashboardPath = ctx + "/admin/dashboard";
 
         boolean loggedIn = request.getSession().getAttribute("user") != null
                 || request.getSession().getAttribute("userId") != null;
         String uri = request.getRequestURI();
         boolean loginRequest = uri.equals(loginPath) || uri.equals(ctx + "/login.xhtml");
+        boolean registerRequest = uri.equals(registerPath) || uri.equals(ctx + "/register.xhtml");
 
-        if (loggedIn || loginRequest) {
-            if (loginRequest && loggedIn) {
-                response.sendRedirect(panelPath + ".xhtml");
-            } else {
-                chain.doFilter(request, response);
+        if (loginRequest || registerRequest) {
+            if (loggedIn) {
+                response.sendRedirect(dashboardPath + ".xhtml");
+                return;
             }
-        } else {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        if (!loggedIn) {
             if (isAJAXRequest(request)) {
                 response.setContentType("text/xml");
                 response.setCharacterEncoding("UTF-8");
@@ -41,7 +51,10 @@ public class SessionFilter implements Filter {
             } else {
                 response.sendRedirect(loginPath + ".xhtml");
             }
+            return;
         }
+
+        chain.doFilter(request, response);
     }
 
     private boolean isAJAXRequest(HttpServletRequest request) {
