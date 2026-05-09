@@ -625,3 +625,150 @@
 .admin-rg-role-checkboxes .ui-chkbox-box {
     margin-right: 0.35rem;
 }
+
+/* Dashboard polish */
+.admin-dashboard-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    background: linear-gradient(145deg, #ffffff 15%, #f0fdfa 85%);
+}
+
+.admin-dashboard-hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.admin-kpi-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #0f766e;
+    background: #ccfbf1;
+    border: 1px solid rgba(13, 148, 136, 0.24);
+    border-radius: 999px;
+    padding: 0.2rem 0.6rem;
+}
+
+.admin-quick-action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+}
+
+.admin-qa-title {
+    font-size: 0.93rem;
+    font-weight: 700;
+    color: var(--admin-page-heading);
+}
+
+.admin-qa-sub {
+    font-size: 0.78rem;
+    color: var(--admin-page-muted);
+    line-height: 1.4;
+}
+
+.admin-kpi-card {
+    border-radius: 0.75rem;
+    border: 1px solid var(--admin-page-border);
+    background: #fff;
+    padding: 1rem 1rem 0.9rem;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.admin-kpi-card-finance {
+    border-top: 3px solid #0ea5e9;
+}
+
+.admin-kpi-card-stock {
+    border-top: 3px solid #f59e0b;
+}
+
+.admin-kpi-card-cheque {
+    border-top: 3px solid #8b5cf6;
+}
+
+.admin-kpi-label {
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--admin-page-muted);
+    margin-bottom: 0.45rem;
+    font-weight: 600;
+}
+
+.admin-kpi-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--admin-page-heading);
+    line-height: 1.2;
+}
+
+.admin-kpi-meta {
+    margin-top: 0.35rem;
+    font-size: 0.78rem;
+    color: var(--admin-page-muted);
+}
+
+.admin-chart-card {
+    min-height: 365px;
+}
+
+.admin-chart-subtitle {
+    margin: 0 0 0.65rem;
+    font-size: 0.82rem;
+    color: var(--admin-page-muted);
+}
+
+.admin-chart-wrap {
+    height: 280px;
+}
+
+.admin-empty-state {
+    border: 1px dashed #cbd5e1;
+    border-radius: 0.65rem;
+    background: #f8fafc;
+    padding: 1.1rem 1rem;
+}
+
+.admin-empty-state-compact {
+    padding: 0.9rem 1rem;
+}
+
+.admin-empty-title {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--admin-page-heading);
+}
+
+.admin-empty-sub {
+    margin-top: 0.2rem;
+    font-size: 0.82rem;
+    color: var(--admin-page-muted);
+}
+
+.admin-empty-link {
+    margin-top: 0.55rem;
+    display: inline-block;
+    font-size: 0.8rem;
+    color: var(--admin-page-teal-dark);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.admin-empty-link:hover {
+    text-decoration: underline;
+}
+
+.admin-alert-list {
+    margin: 0;
+    padding-left: 1rem;
+}
+
+.admin-alert-list li {
+    margin-bottom: 0.45rem;
+    color: var(--admin-page-heading);
+    font-size: 0.88rem;
+}

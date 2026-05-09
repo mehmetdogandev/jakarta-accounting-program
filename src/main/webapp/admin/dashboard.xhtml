@@ -12,65 +12,149 @@
     </ui:define>
 
     <ui:define name="content">
-        <div class="admin-page-card mb-3">
-            <h1 class="admin-page-title">Yönetim paneli</h1>
-            <p class="admin-page-lead mb-0">Yetki bazlı hızlı işlemler ve detaylı özet metrikler.</p>
+        <div class="admin-page-card admin-dashboard-hero mb-3">
+            <div class="admin-dashboard-hero-head">
+                <h1 class="admin-page-title mb-1">Yonetim paneli</h1>
+                <p class="admin-page-lead mb-0">Hizli islemler, temel gostergeler ve trendlerle anlik operasyon ozetiniz.</p>
+            </div>
+            <div class="admin-dashboard-hero-badges">
+                <span class="admin-kpi-tag">Canli KPI</span>
+                <span class="admin-kpi-tag">30 gun trend</span>
+                <span class="admin-kpi-tag">RBAC uyumlu</span>
+            </div>
         </div>
 
         <div class="admin-page-card mb-3">
-            <h2 class="h5 mb-3">Hızlı işlemler</h2>
+            <h2 class="h5 mb-3">Hizli islemler</h2>
             <div class="admin-dashboard-grid">
-                <h:link outcome="/admin/users" styleClass="admin-dash-card" rendered="#{rbac.can('USER','ACCESS')}">Kullanıcılar</h:link>
-                <h:link outcome="/admin/roles" styleClass="admin-dash-card" rendered="#{rbac.can('ROLE','ACCESS')}">Roller</h:link>
-                <h:link outcome="/admin/role-groups" styleClass="admin-dash-card" rendered="#{rbac.can('ROLE_GROUP','ACCESS')}">Rol grupları</h:link>
-                <h:link outcome="/admin/current-accounts" styleClass="admin-dash-card" rendered="#{rbac.can('CURRENT_ACCOUNT','CREATE') or rbac.can('CURRENT_ACCOUNT','ACCESS')}">Cari hesaplar</h:link>
-                <h:link outcome="/admin/journal-entries" styleClass="admin-dash-card" rendered="#{rbac.can('JOURNAL_ENTRY','CREATE') or rbac.can('JOURNAL_ENTRY','ACCESS')}">Muhasebe fişleri</h:link>
-                <h:link outcome="/admin/cash-accounts" styleClass="admin-dash-card" rendered="#{rbac.can('CASH_ACCOUNT','CREATE') or rbac.can('CASH_ACCOUNT','ACCESS')}">Kasalar</h:link>
-                <h:link outcome="/admin/bank-accounts" styleClass="admin-dash-card" rendered="#{rbac.can('BANK_ACCOUNT','CREATE') or rbac.can('BANK_ACCOUNT','ACCESS')}">Banka hesapları</h:link>
-                <h:link outcome="/admin/products" styleClass="admin-dash-card" rendered="#{rbac.can('PRODUCT','CREATE') or rbac.can('PRODUCT','ACCESS')}">Ürünler</h:link>
-                <h:link outcome="/admin/stock-movements" styleClass="admin-dash-card" rendered="#{rbac.can('STOCK_MOVEMENT','CREATE') or rbac.can('STOCK_MOVEMENT','ACCESS')}">Stok hareketleri</h:link>
-                <h:link outcome="/admin/cheques" styleClass="admin-dash-card" rendered="#{rbac.can('CHEQUE','CREATE') or rbac.can('CHEQUE','ACCESS')}">Çek / Senet</h:link>
-                <h:link outcome="/admin/expenses" styleClass="admin-dash-card" rendered="#{rbac.can('EXPENSE','CREATE') or rbac.can('EXPENSE','ACCESS')}">Gelir / Gider</h:link>
-                <h:link outcome="/admin/reports" styleClass="admin-dash-card" rendered="#{rbac.can('REPORT','READ') or rbac.can('REPORT','ACCESS')}">Raporlar</h:link>
+                <h:link outcome="/admin/users" styleClass="admin-dash-card admin-quick-action-card" rendered="#{rbac.can('USER','ACCESS')}">
+                    <span class="admin-qa-title">Kullanicilar</span>
+                    <span class="admin-qa-sub">Kullanici yonetimi</span>
+                </h:link>
+                <h:link outcome="/admin/roles" styleClass="admin-dash-card admin-quick-action-card" rendered="#{rbac.can('ROLE','ACCESS')}">
+                    <span class="admin-qa-title">Roller</span>
+                    <span class="admin-qa-sub">Yetki tanimlari</span>
+                </h:link>
+                <h:link outcome="/admin/role-groups" styleClass="admin-dash-card admin-quick-action-card" rendered="#{rbac.can('ROLE_GROUP','ACCESS')}">
+                    <span class="admin-qa-title">Rol gruplari</span>
+                    <span class="admin-qa-sub">Toplu yetki yonetimi</span>
+                </h:link>
+                <h:link outcome="/admin/current-accounts" styleClass="admin-dash-card admin-quick-action-card" rendered="#{rbac.can('CURRENT_ACCOUNT','CREATE') or rbac.can('CURRENT_ACCOUNT','ACCESS')}">
+                    <span class="admin-qa-title">Cari hesaplar</span>
+                    <span class="admin-qa-sub">Musteri/Tedarikci kartlari</span>
+                </h:link>
+                <h:link outcome="/admin/journal-entries" styleClass="admin-dash-card admin-quick-action-card" rendered="#{rbac.can('JOURNAL_ENTRY','CREATE') or rbac.can('JOURNAL_ENTRY','ACCESS')}">
+                    <span class="admin-qa-title">Muhasebe fisleri</span>
+                    <span class="admin-qa-sub">Borc/Alacak kayitlari</span>
+                </h:link>
+                <h:link outcome="/admin/cash-accounts" styleClass="admin-dash-card admin-quick-action-card" rendered="#{rbac.can('CASH_ACCOUNT','CREATE') or rbac.can('CASH_ACCOUNT','ACCESS')}">
+                    <span class="admin-qa-title">Kasalar</span>
+                    <span class="admin-qa-sub">Nakit hareketleri</span>
+                </h:link>
+                <h:link outcome="/admin/bank-accounts" styleClass="admin-dash-card admin-quick-action-card" rendered="#{rbac.can('BANK_ACCOUNT','CREATE') or rbac.can('BANK_ACCOUNT','ACCESS')}">
+                    <span class="admin-qa-title">Banka hesaplari</span>
+                    <span class="admin-qa-sub">Banka bakiyeleri</span>
+                </h:link>
+                <h:link outcome="/admin/products" styleClass="admin-dash-card admin-quick-action-card" rendered="#{rbac.can('PRODUCT','CREATE') or rbac.can('PRODUCT','ACCESS')}">
+                    <span class="admin-qa-title">Urunler</span>
+                    <span class="admin-qa-sub">Stok kartlari</span>
+                </h:link>
+                <h:link outcome="/admin/stock-movements" styleClass="admin-dash-card admin-quick-action-card" rendered="#{rbac.can('STOCK_MOVEMENT','CREATE') or rbac.can('STOCK_MOVEMENT','ACCESS')}">
+                    <span class="admin-qa-title">Stok hareketleri</span>
+                    <span class="admin-qa-sub">Giris/Cikis takibi</span>
+                </h:link>
+                <h:link outcome="/admin/cheques" styleClass="admin-dash-card admin-quick-action-card" rendered="#{rbac.can('CHEQUE','CREATE') or rbac.can('CHEQUE','ACCESS')}">
+                    <span class="admin-qa-title">Cek / Senet</span>
+                    <span class="admin-qa-sub">Vade ve durum yonetimi</span>
+                </h:link>
+                <h:link outcome="/admin/expenses" styleClass="admin-dash-card admin-quick-action-card" rendered="#{rbac.can('EXPENSE','CREATE') or rbac.can('EXPENSE','ACCESS')}">
+                    <span class="admin-qa-title">Gelir / Gider</span>
+                    <span class="admin-qa-sub">Onay bekleyen kayitlar</span>
+                </h:link>
+                <h:link outcome="/admin/reports" styleClass="admin-dash-card admin-quick-action-card" rendered="#{rbac.can('REPORT','ACCESS')}">
+                    <span class="admin-qa-title">Raporlar</span>
+                    <span class="admin-qa-sub">Mizan, nakit akis, stok</span>
+                </h:link>
+                <h:link outcome="/admin/audit-log" styleClass="admin-dash-card admin-quick-action-card" rendered="#{rbac.can('AUDIT_LOG','ACCESS')}">
+                    <span class="admin-qa-title">Denetim logu</span>
+                    <span class="admin-qa-sub">Sistem aksiyon gecmisi</span>
+                </h:link>
             </div>
         </div>
 
         <div class="row g-3 mb-3">
-            <div class="col-md-3"><div class="admin-dash-card">Toplam kasa<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.formatCurrency(adminDashboardBean.totalCashBalance)}"/></div></div></div>
-            <div class="col-md-3"><div class="admin-dash-card">Toplam banka<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.formatCurrency(adminDashboardBean.totalBankBalance)}"/></div></div></div>
-            <div class="col-md-3"><div class="admin-dash-card">Cari hesap<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.totalCurrentAccounts}"/></div></div></div>
-            <div class="col-md-3"><div class="admin-dash-card">Bekleyen gelir/gider<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.pendingIncomeCount}"/> / <h:outputText value="#{adminDashboardBean.pendingExpenseCount}"/></div></div></div>
+            <div class="col-md-3"><div class="admin-kpi-card admin-kpi-card-finance"><div class="admin-kpi-label">Toplam kasa</div><div class="admin-kpi-value"><h:outputText value="#{adminDashboardBean.formatCurrency(adminDashboardBean.totalCashBalance)}"/></div><div class="admin-kpi-meta">Tum aktif kasalar</div></div></div>
+            <div class="col-md-3"><div class="admin-kpi-card admin-kpi-card-finance"><div class="admin-kpi-label">Toplam banka</div><div class="admin-kpi-value"><h:outputText value="#{adminDashboardBean.formatCurrency(adminDashboardBean.totalBankBalance)}"/></div><div class="admin-kpi-meta">Tum banka hesaplari</div></div></div>
+            <div class="col-md-3"><div class="admin-kpi-card admin-kpi-card-finance"><div class="admin-kpi-label">Cari hesap</div><div class="admin-kpi-value"><h:outputText value="#{adminDashboardBean.totalCurrentAccounts}"/></div><div class="admin-kpi-meta">Aktif kart sayisi</div></div></div>
+            <div class="col-md-3"><div class="admin-kpi-card admin-kpi-card-finance"><div class="admin-kpi-label">Bekleyen gelir/gider</div><div class="admin-kpi-value"><h:outputText value="#{adminDashboardBean.pendingIncomeCount}"/> / <h:outputText value="#{adminDashboardBean.pendingExpenseCount}"/></div><div class="admin-kpi-meta">Onay bekleyen kayitlar</div></div></div>
         </div>
 
         <div class="row g-3 mb-3">
-            <div class="col-md-3"><div class="admin-dash-card">Toplam ürün<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.totalProducts}"/></div></div></div>
-            <div class="col-md-3"><div class="admin-dash-card">Düşük stok<div class="h5 mb-0 text-danger"><h:outputText value="#{adminDashboardBean.lowStockCount}"/></div></div></div>
-            <div class="col-md-3"><div class="admin-dash-card">Stok değeri<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.formatCurrency(adminDashboardBean.stockValuationTotal)}"/></div></div></div>
-            <div class="col-md-3"><div class="admin-dash-card">7 gün vade çek<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.dueSoonChequeCount}"/></div></div></div>
+            <div class="col-md-3"><div class="admin-kpi-card admin-kpi-card-stock"><div class="admin-kpi-label">Toplam urun</div><div class="admin-kpi-value"><h:outputText value="#{adminDashboardBean.totalProducts}"/></div><div class="admin-kpi-meta">Aktif urun kartlari</div></div></div>
+            <div class="col-md-3"><div class="admin-kpi-card admin-kpi-card-stock"><div class="admin-kpi-label">Dusuk stok</div><div class="admin-kpi-value text-danger"><h:outputText value="#{adminDashboardBean.lowStockCount}"/></div><div class="admin-kpi-meta">Kritik seviyedekiler</div></div></div>
+            <div class="col-md-3"><div class="admin-kpi-card admin-kpi-card-stock"><div class="admin-kpi-label">Stok degeri</div><div class="admin-kpi-value"><h:outputText value="#{adminDashboardBean.formatCurrency(adminDashboardBean.stockValuationTotal)}"/></div><div class="admin-kpi-meta">Ortalama maliyet bazli</div></div></div>
+            <div class="col-md-3"><div class="admin-kpi-card admin-kpi-card-cheque"><div class="admin-kpi-label">7 gun vade cek</div><div class="admin-kpi-value"><h:outputText value="#{adminDashboardBean.dueSoonChequeCount}"/></div><div class="admin-kpi-meta">Yaklasan vade</div></div></div>
         </div>
 
         <div class="row g-3 mb-3">
-            <div class="col-md-6"><div class="admin-dash-card">Yatırılmış çek<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.depositedChequeCount}"/></div></div></div>
-            <div class="col-md-6"><div class="admin-dash-card">Verilmiş çek<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.issuedChequeCount}"/></div></div></div>
+            <div class="col-md-6"><div class="admin-kpi-card admin-kpi-card-cheque"><div class="admin-kpi-label">Yatirilmis cek</div><div class="admin-kpi-value"><h:outputText value="#{adminDashboardBean.depositedChequeCount}"/></div><div class="admin-kpi-meta">Portfoyden bankaya alinan</div></div></div>
+            <div class="col-md-6"><div class="admin-kpi-card admin-kpi-card-cheque"><div class="admin-kpi-label">Verilmis cek</div><div class="admin-kpi-value"><h:outputText value="#{adminDashboardBean.issuedChequeCount}"/></div><div class="admin-kpi-meta">Odeme icin duzenlenen</div></div></div>
         </div>
 
         <div class="row g-3">
             <div class="col-lg-6">
-                <div class="admin-page-card">
-                    <h2 class="h6 mb-3">Nakit akışı (30 gün)</h2>
-                    <div style="height: 280px;">
-                        <p:chart type="line" model="#{adminDashboardBean.cashFlowChart}" style="height:100%"/>
-                    </div>
+                <div class="admin-page-card admin-chart-card">
+                    <h2 class="h6 mb-1">Nakit akisi (30 gun)</h2>
+                    <p class="admin-chart-subtitle">Kasa + banka net gunluk hareket toplami</p>
+                    <h:panelGroup rendered="#{adminDashboardBean.hasCashFlowData}">
+                        <div class="admin-chart-wrap">
+                            <p:chart type="line" model="#{adminDashboardBean.cashFlowChart}" style="height:100%"/>
+                        </div>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{not adminDashboardBean.hasCashFlowData}">
+                        <div class="admin-empty-state">
+                            <div class="admin-empty-title">Grafik icin veri yok</div>
+                            <div class="admin-empty-sub">Son 30 gunde nakit akisi kaydi bulunamadi.</div>
+                            <h:link outcome="/admin/cash-accounts" styleClass="admin-empty-link" rendered="#{rbac.can('CASH_ACCOUNT','ACCESS')}">Kasa hareketlerine git</h:link>
+                        </div>
+                    </h:panelGroup>
                 </div>
             </div>
             <div class="col-lg-6">
-                <div class="admin-page-card">
-                    <h2 class="h6 mb-3">Gelir / Gider trendi (30 gün)</h2>
-                    <div style="height: 280px;">
-                        <p:chart type="line" model="#{adminDashboardBean.incomeExpenseChart}" style="height:100%"/>
-                    </div>
+                <div class="admin-page-card admin-chart-card">
+                    <h2 class="h6 mb-1">Gelir / Gider trendi (30 gun)</h2>
+                    <p class="admin-chart-subtitle">Onayli gelir ve gider kayitlarinin gunluk dagilimi</p>
+                    <h:panelGroup rendered="#{adminDashboardBean.hasIncomeExpenseData}">
+                        <div class="admin-chart-wrap">
+                            <p:chart type="line" model="#{adminDashboardBean.incomeExpenseChart}" style="height:100%"/>
+                        </div>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{not adminDashboardBean.hasIncomeExpenseData}">
+                        <div class="admin-empty-state">
+                            <div class="admin-empty-title">Grafik icin veri yok</div>
+                            <div class="admin-empty-sub">Secilen son 30 gun doneminde onayli gelir/gider kaydi yok.</div>
+                            <h:link outcome="/admin/expenses" styleClass="admin-empty-link" rendered="#{rbac.can('EXPENSE','ACCESS')}">Gelir / Gider sayfasina git</h:link>
+                        </div>
+                    </h:panelGroup>
                 </div>
             </div>
+        </div>
+
+        <div class="admin-page-card mt-3">
+            <h2 class="h6 mb-2">Onemli uyarilar</h2>
+            <h:panelGroup rendered="#{adminDashboardBean.allClear}">
+                <div class="admin-empty-state admin-empty-state-compact">
+                    <div class="admin-empty-title">Su anda kritik uyari yok</div>
+                    <div class="admin-empty-sub">Tum izlenen metrikler normal aralikta gorunuyor.</div>
+                </div>
+            </h:panelGroup>
+            <h:panelGroup rendered="#{not adminDashboardBean.allClear}">
+                <ul class="admin-alert-list mb-0">
+                    <ui:repeat value="#{adminDashboardBean.alertMessages}" var="msg">
+                        <li>#{msg}</li>
+                    </ui:repeat>
+                </ul>
+            </h:panelGroup>
         </div>
     </ui:define>
 </ui:composition>

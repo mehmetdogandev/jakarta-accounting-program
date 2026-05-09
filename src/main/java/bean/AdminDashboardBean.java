@@ -67,6 +67,9 @@ public class AdminDashboardBean implements Serializable {
     private long issuedChequeCount;
     private LineChartModel cashFlowChart;
     private LineChartModel incomeExpenseChart;
+    private boolean hasCashFlowData;
+    private boolean hasIncomeExpenseData;
+    private List<String> alertMessages = List.of();
 
     @PostConstruct
     public void init() {
@@ -134,6 +137,22 @@ public class AdminDashboardBean implements Serializable {
         return incomeExpenseChart;
     }
 
+    public boolean isHasCashFlowData() {
+        return hasCashFlowData;
+    }
+
+    public boolean isHasIncomeExpenseData() {
+        return hasIncomeExpenseData;
+    }
+
+    public List<String> getAlertMessages() {
+        return alertMessages;
+    }
+
+    public boolean isAllClear() {
+        return alertMessages.isEmpty();
+    }
+
     private void loadKpis() {
         totalCashBalance = cashAccountFacade.findAll().stream()
                 .map(CashAccount::getBalance)
@@ -166,6 +185,18 @@ public class AdminDashboardBean implements Serializable {
         dueSoonChequeCount = chequeFacade.findDueWithin(7).size();
         depositedChequeCount = cheques.stream().filter(c -> "DEPOSITED".equalsIgnoreCase(c.getStatus())).count();
         issuedChequeCount = cheques.stream().filter(c -> "ISSUED".equalsIgnoreCase(c.getChequeType())).count();
+
+        List<String> alerts = new ArrayList<>();
+        if (lowStockCount > 0) {
+            alerts.add(lowStockCount + " urunde dusuk stok var.");
+        }
+        if (dueSoonChequeCount > 0) {
+            alerts.add(dueSoonChequeCount + " cekin vadesi 7 gun icinde doluyor.");
+        }
+        if (pendingExpenseCount + pendingIncomeCount > 0) {
+            alerts.add((pendingExpenseCount + pendingIncomeCount) + " gelir/gider kaydi onay bekliyor.");
+        }
+        alertMessages = alerts;
     }
 
     private void buildCharts() {
@@ -213,6 +244,7 @@ public class AdminDashboardBean implements Serializable {
 
         cashFlowChart = new LineChartModel();
         cashFlowChart.setData(singleSeriesChartData("Net Nakit Akisi", "#0ea5e9", cashFlowSeries));
+        hasCashFlowData = cashFlowSeries.values().stream().anyMatch(v -> v.compareTo(BigDecimal.ZERO) != 0);
 
         incomeExpenseChart = new LineChartModel();
         ChartData ieData = new ChartData();
@@ -220,6 +252,8 @@ public class AdminDashboardBean implements Serializable {
         ieData.addChartDataSet(series("Gelir", "#16a34a", incomeSeries.values().stream().toList()));
         ieData.addChartDataSet(series("Gider", "#dc2626", expenseSeries.values().stream().toList()));
         incomeExpenseChart.setData(ieData);
+        hasIncomeExpenseData = incomeSeries.values().stream().anyMatch(v -> v.compareTo(BigDecimal.ZERO) != 0)
+                || expenseSeries.values().stream().anyMatch(v -> v.compareTo(BigDecimal.ZERO) != 0);
     }
 
     private ChartData singleSeriesChartData(String label, String color, Map<LocalDate, BigDecimal> map) {
