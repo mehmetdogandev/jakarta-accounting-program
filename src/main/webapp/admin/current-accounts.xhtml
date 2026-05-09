@@ -1,0 +1,143 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/admin.xhtml">
+
+    <ui:define name="title">Cari hesaplar</ui:define>
+
+    <ui:define name="topbar">
+        <span class="admin-app-topbar-heading">Cari hesaplar</span>
+    </ui:define>
+
+    <ui:define name="content">
+        <h:form id="mainForm">
+            <p:messages id="msgs" showDetail="true" closable="true"/>
+
+            <div class="admin-page-card">
+                <h1 class="admin-page-title">Cari hesaplar</h1>
+                <p class="admin-page-lead">Müşteri ve tedarikçi kartlarını yönetin; bakiye ve iletişim bilgilerini izleyin.</p>
+
+                <div class="admin-list-panel">
+                    <div class="admin-toolbar">
+                        <div class="admin-toolbar-actions">
+                            <p:commandButton value="Yeni cari" icon="pi pi-plus" styleClass="admin-btn-primary"
+                                             actionListener="#{adminCurrentAccountBean.openNew}"
+                                             update="mainForm"
+                                             rendered="#{rbac.can('CURRENT_ACCOUNT','CREATE')}"
+                                             oncomplete="PF('currentAccountDlg').show()"/>
+                        </div>
+                    </div>
+
+                    <p:dataTable id="accountsTable"
+                                 value="#{adminCurrentAccountBean.accounts}"
+                                 var="account"
+                                 paginator="true"
+                                 paginatorPosition="bottom"
+                                 rows="10"
+                                 emptyMessage="Kayıt yok"
+                                 styleClass="admin-table">
+                        <p:column headerText="Cari kodu">
+                            <h:outputText value="#{account.code}"/>
+                        </p:column>
+                        <p:column headerText="Cari adı">
+                            <h:outputText value="#{account.name}"/>
+                        </p:column>
+                        <p:column headerText="Tip">
+                            <h:outputText value="#{account.type}"/>
+                        </p:column>
+                        <p:column headerText="Vergi no">
+                            <h:outputText value="#{empty account.taxNumber ? '—' : account.taxNumber}"/>
+                        </p:column>
+                        <p:column headerText="Telefon">
+                            <h:outputText value="#{empty account.phone ? '—' : account.phone}"/>
+                        </p:column>
+                        <p:column headerText="Bakiye">
+                            <h:outputText value="#{adminCurrentAccountBean.formatCurrency(account.currentBalance)}"/>
+                        </p:column>
+                        <p:column headerText="İşlemler" style="width:9rem">
+                            <p:commandButton icon="pi pi-pencil" title="Düzenle"
+                                             styleClass="admin-btn-icon"
+                                             actionListener="#{adminCurrentAccountBean.openEdit(account)}"
+                                             update="mainForm"
+                                             rendered="#{rbac.can('CURRENT_ACCOUNT','UPDATE')}"
+                                             oncomplete="PF('currentAccountDlg').show()"/>
+                            <p:commandButton icon="pi pi-trash" title="Sil"
+                                             styleClass="admin-btn-icon admin-btn-danger-icon ms-1"
+                                             actionListener="#{adminCurrentAccountBean.softDelete(account)}"
+                                             update="mainForm"
+                                             rendered="#{rbac.can('CURRENT_ACCOUNT','DELETE')}">
+                                <p:confirm header="Onay" message="Cari kayıt soft-delete ile kaldırılsın mı?" icon="pi pi-exclamation-triangle"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                </div>
+            </div>
+
+            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade"/>
+
+            <p:dialog id="currentAccountDlg" header="Cari kart" widgetVar="currentAccountDlg" modal="true"
+                      appendTo="@body" dynamic="true" responsive="true"
+                      styleClass="admin-dialog admin-dialog-form"
+                      style="max-width: min(92vw, 720px); width: 100%;">
+                <h:panelGroup rendered="#{adminCurrentAccountBean.selected != null}">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="mainForm:codeInp">Cari kodu</label>
+                            <p:inputText id="codeInp" value="#{adminCurrentAccountBean.selected.code}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="mainForm:nameInp">Cari adı/ünvan</label>
+                            <p:inputText id="nameInp" value="#{adminCurrentAccountBean.selected.name}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tip</label>
+                            <p:selectOneMenu value="#{adminCurrentAccountBean.selected.type}" styleClass="w-100 admin-dialog-select">
+                                <f:selectItems value="#{adminCurrentAccountBean.typeOptions}" var="tp"
+                                               itemValue="#{tp}" itemLabel="#{tp}"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="mainForm:taxNoInp">Vergi/TC no</label>
+                            <p:inputText id="taxNoInp" value="#{adminCurrentAccountBean.selected.taxNumber}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="mainForm:taxOfficeInp">Vergi dairesi</label>
+                            <p:inputText id="taxOfficeInp" value="#{adminCurrentAccountBean.selected.taxOffice}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="mainForm:phoneInp">Telefon</label>
+                            <p:inputText id="phoneInp" value="#{adminCurrentAccountBean.selected.phone}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="mainForm:emailInp">E-posta</label>
+                            <p:inputText id="emailInp" value="#{adminCurrentAccountBean.selected.email}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="mainForm:creditLimitInp">Kredi limiti</label>
+                            <p:inputText id="creditLimitInp" value="#{adminCurrentAccountBean.selected.creditLimit}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="mainForm:balanceInp">Güncel bakiye</label>
+                            <p:inputText id="balanceInp" value="#{adminCurrentAccountBean.selected.currentBalance}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label" for="mainForm:addressInp">Adres</label>
+                            <p:inputTextarea id="addressInp" value="#{adminCurrentAccountBean.selected.address}" rows="3" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                    </div>
+
+                    <div class="admin-dialog-footer d-flex flex-wrap justify-content-end gap-2">
+                        <p:commandButton value="Kaydet" icon="pi pi-check"
+                                         action="#{adminCurrentAccountBean.save}"
+                                         update="mainForm" process="@form"
+                                         styleClass="admin-btn-primary"/>
+                        <p:commandButton value="İptal" icon="pi pi-times" type="button" styleClass="ui-button-secondary"
+                                         onclick="PF('currentAccountDlg').hide()"/>
+                    </div>
+                </h:panelGroup>
+            </p:dialog>
+        </h:form>
+    </ui:define>
+</ui:composition>

@@ -54,7 +54,11 @@
             <details class="admin-sb-details">
                 <summary class="admin-sb-details-summary">Muhasebe işlemleri</summary>
                 <div class="admin-sb-details-body">
-                    <p class="admin-sb-placeholder">Bu gruptaki muhasebe sayfaları eklendikçe menü güncellenecek.</p>
+                    <h:link outcome="/admin/current-accounts"
+                            styleClass="#{view.viewId == '/admin/current-accounts.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                            rendered="#{rbac.can('CURRENT_ACCOUNT','ACCESS')}">
+                        Cari hesaplar
+                    </h:link>
                 </div>
             </details>
         </nav>
