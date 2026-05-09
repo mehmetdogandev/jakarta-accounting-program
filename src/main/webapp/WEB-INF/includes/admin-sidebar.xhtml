@@ -5,13 +5,25 @@
 
     <div class="admin-sidebar-inner d-flex flex-column min-vh-100">
         <header class="admin-sb-header">
-            <h:link outcome="/admin/dashboard.xhtml" styleClass="admin-sb-brand">
+            <h:link outcome="/admin/dashboard.xhtml" styleClass="admin-sb-brand admin-sb-brand-grow">
                 <span class="admin-sb-badge">JM</span>
-                <div>
+                <div class="min-w-0">
                     <div class="admin-sb-title">Jakarta Muhasebe</div>
                     <div class="admin-sb-sub">Yönetim paneli</div>
                 </div>
             </h:link>
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm d-none d-lg-flex align-items-center justify-content-center p-2 admin-sidebar-toggle-collapse flex-shrink-0"
+                    data-admin-sidebar-action="collapse"
+                    aria-controls="adminSidebar"
+                    aria-expanded="true"
+                    title="Kenar çubuğunu gizle"
+                    aria-label="Kenar çubuğunu gizle">
+                <svg class="admin-icon-panel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     aria-hidden="true">
+                    <path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M9 4v16M9 4h10a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H9"/>
+                </svg>
+            </button>
         </header>
 
         <nav class="admin-sb-content flex-grow-1 overflow-y-auto">

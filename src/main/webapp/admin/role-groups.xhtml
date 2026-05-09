@@ -7,6 +7,10 @@
 
     <ui:define name="title">Rol grupları</ui:define>
 
+    <ui:define name="topbar">
+        <span class="admin-app-topbar-heading">Rol grupları</span>
+    </ui:define>
+
     <ui:define name="content">
         <h:form id="mainForm">
             <p:messages id="msgs" showDetail="true" closable="true"/>
@@ -33,7 +37,7 @@
 
                 <p:outputPanel id="rgTablePanel" layout="block">
                     <p:dataTable id="rgTbl" value="#{adminRoleGroupsBean.filteredGroups}" var="g"
-                                 paginator="true" rows="10" emptyMessage="Kayıt yok"
+                                 paginator="true" paginatorPosition="bottom" rows="10" emptyMessage="Kayıt yok"
                                  styleClass="admin-table">
                         <p:column headerText="Grup">
                             <div class="admin-rg-title">

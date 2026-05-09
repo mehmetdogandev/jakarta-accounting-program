@@ -7,6 +7,10 @@
 
     <ui:define name="title">Roller</ui:define>
 
+    <ui:define name="topbar">
+        <span class="admin-app-topbar-heading">Roller</span>
+    </ui:define>
+
     <ui:define name="content">
         <h:form id="mainForm">
             <p:messages id="msgs" showDetail="true" closable="true"/>
@@ -33,7 +37,7 @@
 
                 <p:outputPanel id="rolesTablePanel" layout="block">
                     <p:dataTable id="rolesTbl" value="#{adminRolesBean.filteredRoles}" var="r"
-                                 paginator="true" rows="10" emptyMessage="Kayıt yok"
+                                 paginator="true" paginatorPosition="bottom" rows="10" emptyMessage="Kayıt yok"
                                  styleClass="admin-table">
                         <p:column headerText="Rol">
                             <div class="admin-role-title">

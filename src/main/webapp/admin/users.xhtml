@@ -7,6 +7,10 @@
 
     <ui:define name="title">Kullanıcılar</ui:define>
 
+    <ui:define name="topbar">
+        <span class="admin-app-topbar-heading">Kullanıcılar</span>
+    </ui:define>
+
     <ui:define name="content">
         <h:form id="mainForm">
             <p:messages id="msgs" showDetail="true" closable="true"/>
@@ -33,7 +37,7 @@
 
                 <p:outputPanel id="usersTablePanel" layout="block">
                     <p:dataTable id="usersTbl" value="#{adminUsersBean.filteredUsers}" var="u"
-                                 paginator="true" rows="10" emptyMessage="Kayıt yok"
+                                 paginator="true" paginatorPosition="bottom" rows="10" emptyMessage="Kayıt yok"
                                  styleClass="admin-table">
                         <f:facet name="header">
                             <div class="d-flex justify-content-end pb-1">

@@ -3,6 +3,7 @@
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
       xmlns:ui="jakarta.faces.facelets">
+<!-- Admin layout: shell (admin-shell.*) / page chrome (admin-pages.*) / PF overrides in those CSS files. -->
 <f:view locale="tr">
     <h:head>
         <meta charset="utf-8"/>
@@ -17,7 +18,7 @@
         <h:outputScript library="js" name="bootstrap.bundle.min.js"/>
     </h:head>
     <h:body styleClass="admin-body">
-        <div class="admin-root">
+        <div id="adminShell" class="admin-root admin-shell">
             <div class="offcanvas offcanvas-start offcanvas-lg admin-offcanvas-sidebar"
                  tabindex="-1"
                  id="adminSidebar"
@@ -34,8 +35,8 @@
                 </div>
             </div>
 
-            <div class="admin-main flex-grow-1 d-flex flex-column min-vh-100">
-                <header class="admin-topbar d-lg-none d-flex align-items-center gap-2 px-3 py-2 bg-white">
+            <div class="admin-main flex-grow-1 d-flex flex-column min-vh-100 min-w-0">
+                <header class="admin-topbar admin-topbar--mobile d-lg-none d-flex align-items-center gap-2 px-3 py-2 bg-white">
                     <button type="button"
                             class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center p-2"
                             data-bs-toggle="offcanvas"
@@ -49,11 +50,38 @@
                     </button>
                     <span class="admin-topbar-title">Jakarta Muhasebe</span>
                 </header>
-                <main class="admin-content flex-grow-1 p-3 p-lg-4">
+
+                <header class="admin-app-topbar d-none d-lg-flex align-items-stretch bg-white border-bottom"
+                        style="border-color: var(--sidebar-border) !important;">
+                    <div class="admin-app-topbar-start d-flex align-items-center px-2">
+                        <button type="button"
+                                class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center p-2 admin-sidebar-toggle-open"
+                                data-admin-sidebar-action="open"
+                                aria-controls="adminSidebar"
+                                aria-expanded="false"
+                                aria-label="Kenar çubuğunu aç">
+                            <svg class="admin-icon-panel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 aria-hidden="true">
+                                <path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M9 4v16M9 4h10a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H9"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="admin-app-topbar-center flex-grow-1 d-flex align-items-center px-3 min-w-0">
+                        <ui:insert name="topbar">
+                            <span class="admin-app-topbar-heading">Yönetim paneli</span>
+                        </ui:insert>
+                    </div>
+                    <div class="admin-app-topbar-end d-flex align-items-center gap-2 px-2 flex-shrink-0">
+                        <ui:insert name="topbarActions"/>
+                    </div>
+                </header>
+
+                <main class="admin-content admin-content--fluid flex-grow-1 p-3 p-lg-4 min-w-0">
                     <ui:insert name="content"/>
                 </main>
             </div>
         </div>
+        <h:outputScript library="js" name="admin-shell.js"/>
     </h:body>
 </f:view>
 </html>

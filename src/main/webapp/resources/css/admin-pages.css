@@ -18,6 +18,7 @@
         0 4px 12px rgba(15, 23, 42, 0.04);
     padding: 1.5rem 1.35rem;
     margin-bottom: 0;
+    min-width: 0;
 }
 
 .admin-page-title {
@@ -133,6 +134,26 @@
     background: #fef2f2 !important;
 }
 
+.admin-table.ui-datatable {
+    width: 100%;
+    max-width: 100%;
+}
+
+.admin-table.ui-datatable .ui-datatable-tablewrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    max-width: 100%;
+}
+
+.admin-table.ui-datatable .ui-datatable-scrollable-body {
+    overflow-x: auto;
+}
+
+.admin-table.ui-datatable .ui-paginator-top {
+    display: none !important;
+}
+
 .admin-table.ui-datatable .ui-datatable-tablewrapper table {
     border-collapse: separate;
     border-spacing: 0;
@@ -162,10 +183,17 @@
     border-bottom: none !important;
 }
 
-.admin-table.ui-datatable .ui-paginator {
+.admin-table.ui-datatable .ui-paginator,
+.admin-table.ui-datatable .ui-paginator-bottom {
     border: none !important;
     padding: 0.85rem 0 0 !important;
     background: transparent !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 0.35rem !important;
+    width: 100%;
 }
 
 .admin-table.ui-datatable .ui-paginator .ui-paginator-page,
