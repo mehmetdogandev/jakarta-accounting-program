@@ -11,44 +11,80 @@
         <h:form id="mainForm">
             <p:messages id="msgs" showDetail="true" closable="true"/>
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h1 class="h4 mb-0">Roller (ROLE)</h1>
-                <p:commandButton value="Ekle" icon="pi pi-plus" styleClass="ui-button-success"
-                                 actionListener="#{adminRolesBean.openNew}"
-                                 update="mainForm"
-                                 rendered="#{rbac.can('ROLE','CREATE')}"
-                                 oncomplete="PF('roleDlg').show()"/>
-            </div>
+            <div class="admin-page-card">
+                <h1 class="admin-page-title">Roller</h1>
+                <p class="admin-page-lead">USER, ROLE ve ROLE_GROUP kapsamlarındaki roller tek listede görünür; izin rozetleri satır bazında özetlenir.</p>
 
-            <p:dataTable value="#{adminRolesBean.roles}" var="r" paginator="true" rows="10" emptyMessage="Kayıt yok">
-                <p:column headerText="Ad">
-                    <h:outputText value="#{r.name}"/>
-                </p:column>
-                <p:column headerText="Scope">
-                    <h:outputText value="#{r.scope}"/>
-                </p:column>
-                <p:column headerText="İşlemler" style="width:200px">
-                    <p:commandButton icon="pi pi-pencil" title="Düzenle"
-                                     actionListener="#{adminRolesBean.openEdit(r)}"
+                <div class="admin-toolbar">
+                    <div class="admin-toolbar-grow admin-search-wrap">
+                        <span class="admin-search-icon pi pi-search" aria-hidden="true"/>
+                        <p:inputText value="#{adminRolesBean.roleSearch}"
+                                     placeholder="Rol adına göre ara…"
+                                     styleClass="w-100">
+                            <p:ajax event="keyup" delay="300" update="rolesTablePanel"/>
+                        </p:inputText>
+                    </div>
+                    <p:commandButton value="Yeni rol" icon="pi pi-plus" styleClass="admin-btn-primary"
+                                     actionListener="#{adminRolesBean.openNew}"
                                      update="mainForm"
-                                     rendered="#{rbac.can('ROLE','UPDATE')}"
+                                     rendered="#{rbac.can('ROLE','CREATE')}"
                                      oncomplete="PF('roleDlg').show()"/>
-                    <p:commandButton icon="pi pi-trash" title="Sil" styleClass="ui-button-danger ms-1"
-                                     actionListener="#{adminRolesBean.softDelete(r)}"
-                                     update="mainForm"
-                                     rendered="#{rbac.can('ROLE','DELETE')}">
-                        <p:confirm header="Onay" message="Rol soft-delete ile kaldırılsın mı?" icon="pi pi-exclamation-triangle"/>
-                    </p:commandButton>
-                </p:column>
-            </p:dataTable>
+                </div>
+
+                <p:outputPanel id="rolesTablePanel" layout="block">
+                    <p:dataTable id="rolesTbl" value="#{adminRolesBean.filteredRoles}" var="r"
+                                 paginator="true" rows="10" emptyMessage="Kayıt yok"
+                                 styleClass="admin-table">
+                        <p:column headerText="Rol">
+                            <div class="admin-role-title">
+                                <h:outputText value="#{r.name}"/>
+                            </div>
+                            <div class="admin-role-scope">
+                                <h:outputText value="#{r.scope}"/>
+                            </div>
+                        </p:column>
+                        <p:column headerText="İzinler">
+                            <ui:repeat value="#{adminRolesBean.permissionsFor(r)}" var="perm">
+                                <span class="admin-badge"><h:outputText value="#{perm.name()}"/></span>
+                            </ui:repeat>
+                            <h:panelGroup rendered="#{empty adminRolesBean.permissionsFor(r)}">
+                                <span class="text-muted small">—</span>
+                            </h:panelGroup>
+                        </p:column>
+                        <p:column headerText="İşlemler" style="width:120px">
+                            <p:commandButton icon="pi pi-pencil" title="Düzenle"
+                                             styleClass="admin-btn-icon"
+                                             actionListener="#{adminRolesBean.openEdit(r)}"
+                                             update="mainForm"
+                                             rendered="#{rbac.can('ROLE','UPDATE')}"
+                                             oncomplete="PF('roleDlg').show()"/>
+                            <p:commandButton icon="pi pi-trash" title="Sil"
+                                             styleClass="admin-btn-icon admin-btn-danger-icon ms-1"
+                                             actionListener="#{adminRolesBean.softDelete(r)}"
+                                             update="mainForm"
+                                             rendered="#{rbac.can('ROLE','DELETE')}">
+                                <p:confirm header="Onay" message="Rol soft-delete ile kaldırılsın mı?" icon="pi pi-exclamation-triangle"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                </p:outputPanel>
+            </div>
 
             <p:confirmDialog global="true" showEffect="fade" hideEffect="fade"/>
 
-            <p:dialog id="roleDlg" header="Rol" widgetVar="roleDlg" modal="true" appendTo="@body" dynamic="true" width="520">
+            <p:dialog id="roleDlg" header="Rol" widgetVar="roleDlg" modal="true" appendTo="@body" dynamic="true"
+                      width="540" styleClass="admin-dialog">
                 <h:panelGroup rendered="#{adminRolesBean.editRole != null}">
                     <div class="mb-2">
                         <label class="form-label">Ad</label>
                         <p:inputText value="#{adminRolesBean.editRole.name}" styleClass="form-control w-100"/>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Kapsam</label>
+                        <p:selectOneMenu value="#{adminRolesBean.editRole.scope}" styleClass="w-100">
+                            <f:selectItems value="#{adminRolesBean.scopeOptions}" var="sc"
+                                           itemValue="#{sc}" itemLabel="#{sc.name()}"/>
+                        </p:selectOneMenu>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">İzinler</label>

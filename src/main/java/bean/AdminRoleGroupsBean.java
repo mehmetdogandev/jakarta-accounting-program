@@ -16,7 +16,10 @@ import procedure.RbacProcedureBean;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 @Named
@@ -33,9 +36,11 @@ public class AdminRoleGroupsBean implements Serializable {
     private RbacProcedureBean rbacProcedure;
 
     private List<RoleGroup> groups = Collections.emptyList();
+    private Map<UUID, List<String>> linkedRoleNamesByGroupId = Collections.emptyMap();
     private List<Role> assignableRoles = Collections.emptyList();
     private RoleGroup editGroup;
     private List<Role> selectedRoles = new ArrayList<>();
+    private String groupSearch = "";
 
     @PostConstruct
     public void init() {
@@ -46,10 +51,25 @@ public class AdminRoleGroupsBean implements Serializable {
         if (!rbacProcedure.require(Scope.ROLE_GROUP, Permission.READ)) {
             groups = Collections.emptyList();
             assignableRoles = Collections.emptyList();
+            linkedRoleNamesByGroupId = Collections.emptyMap();
             return;
         }
         groups = roleGroupFacade.listActive();
         assignableRoles = roleGroupFacade.listRolesForAssignment();
+
+        Map<UUID, List<String>> map = new LinkedHashMap<>();
+        for (RoleGroup g : groups) {
+            List<String> names = new ArrayList<>();
+            for (UUID rid : roleGroupFacade.linkedRoleIds(g.getId())) {
+                Role r = roleFacade.findById(rid);
+                if (r != null) {
+                    names.add(r.getName());
+                }
+            }
+            names.sort(String.CASE_INSENSITIVE_ORDER);
+            map.put(g.getId(), names);
+        }
+        linkedRoleNamesByGroupId = map;
     }
 
     public void openNew() {
@@ -106,6 +126,43 @@ public class AdminRoleGroupsBean implements Serializable {
 
     public List<RoleGroup> getGroups() {
         return groups;
+    }
+
+    public String getGroupSearch() {
+        return groupSearch;
+    }
+
+    public void setGroupSearch(String groupSearch) {
+        this.groupSearch = groupSearch;
+    }
+
+    public List<RoleGroup> getFilteredGroups() {
+        String q = groupSearch == null ? "" : groupSearch.trim().toLowerCase(Locale.ROOT);
+        if (q.isEmpty()) {
+            return groups;
+        }
+        return groups.stream().filter(g -> groupMatches(g, q)).toList();
+    }
+
+    private static boolean groupMatches(RoleGroup g, String q) {
+        return contains(g.getTitle(), q) || contains(g.getDescription(), q);
+    }
+
+    private static boolean contains(String field, String q) {
+        return field != null && field.toLowerCase(Locale.ROOT).contains(q);
+    }
+
+    public List<String> linkedRolesTopThree(RoleGroup g) {
+        List<String> all = linkedRoleNamesByGroupId.getOrDefault(g.getId(), List.of());
+        if (all.size() <= 3) {
+            return all;
+        }
+        return all.subList(0, 3);
+    }
+
+    public int linkedRolesExtraCount(RoleGroup g) {
+        int n = linkedRoleNamesByGroupId.getOrDefault(g.getId(), List.of()).size();
+        return Math.max(0, n - 3);
     }
 
     public RoleGroup getEditGroup() {

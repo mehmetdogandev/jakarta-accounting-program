@@ -8,16 +8,19 @@
     <ui:define name="title">Yönetim</ui:define>
 
     <ui:define name="content">
-        <h1 class="h3 mb-3">Yönetim paneli</h1>
-        <p class="text-muted">Sol menüden modüllere erişin. Menü öğeleri ACCESS yetkisine göre görünür.</p>
-        <div class="d-flex flex-wrap gap-2">
-            <h:link outcome="/admin/users" styleClass="btn btn-primary" rendered="#{rbac.can('USER','ACCESS')}">
+        <div class="admin-page-card mb-3">
+            <h1 class="admin-page-title">Yönetim paneli</h1>
+            <p class="admin-page-lead mb-0">Sol menüden modüllere erişin. Menü öğeleri ACCESS yetkisine göre görünür.</p>
+        </div>
+
+        <div class="admin-dashboard-grid">
+            <h:link outcome="/admin/users" styleClass="admin-dash-card" rendered="#{rbac.can('USER','ACCESS')}">
                 Kullanıcılar
             </h:link>
-            <h:link outcome="/admin/roles" styleClass="btn btn-primary" rendered="#{rbac.can('ROLE','ACCESS')}">
+            <h:link outcome="/admin/roles" styleClass="admin-dash-card" rendered="#{rbac.can('ROLE','ACCESS')}">
                 Roller
             </h:link>
-            <h:link outcome="/admin/role-groups" styleClass="btn btn-primary"
+            <h:link outcome="/admin/role-groups" styleClass="admin-dash-card"
                     rendered="#{rbac.can('ROLE_GROUP','ACCESS')}">
                 Rol grupları
             </h:link>

@@ -15,7 +15,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 
 @Named
 @ViewScoped
@@ -28,8 +33,10 @@ public class AdminRolesBean implements Serializable {
     private RbacProcedureBean rbacProcedure;
 
     private List<Role> roles = Collections.emptyList();
+    private Map<UUID, List<Permission>> permissionsByRoleId = Collections.emptyMap();
     private Role editRole;
     private List<Permission> selectedPermissions = new ArrayList<>();
+    private String roleSearch = "";
 
     @PostConstruct
     public void init() {
@@ -39,13 +46,29 @@ public class AdminRolesBean implements Serializable {
     public void refresh() {
         if (!rbacProcedure.require(Scope.ROLE, Permission.READ)) {
             roles = Collections.emptyList();
+            permissionsByRoleId = Collections.emptyMap();
             return;
         }
-        roles = roleFacade.listByScope(Scope.ROLE);
+        List<Role> merged = new ArrayList<>();
+        for (Scope scope : Scope.values()) {
+            merged.addAll(roleFacade.listByScope(scope));
+        }
+        merged.sort(Comparator.comparing(Role::getScope).thenComparing(r -> r.getName(), String.CASE_INSENSITIVE_ORDER));
+        roles = merged;
+
+        Map<UUID, List<Permission>> map = new LinkedHashMap<>();
+        for (Role r : roles) {
+            map.put(r.getId(), List.copyOf(roleFacade.listPermissions(r.getId())));
+        }
+        permissionsByRoleId = map;
     }
 
     public List<Permission> getPermissionOptions() {
         return Arrays.asList(Permission.values());
+    }
+
+    public List<Scope> getScopeOptions() {
+        return Arrays.asList(Scope.values());
     }
 
     public void openNew() {
@@ -71,7 +94,6 @@ public class AdminRolesBean implements Serializable {
             return;
         }
         String actor = rbacProcedure.currentUserId().orElse(null);
-        editRole.setScope(Scope.ROLE);
         boolean isNew = editRole.getId() == null || roleFacade.findById(editRole.getId()) == null;
         if (isNew) {
             if (!rbacProcedure.require(Scope.ROLE, Permission.CREATE)) {
@@ -97,6 +119,28 @@ public class AdminRolesBean implements Serializable {
 
     public List<Role> getRoles() {
         return roles;
+    }
+
+    public String getRoleSearch() {
+        return roleSearch;
+    }
+
+    public void setRoleSearch(String roleSearch) {
+        this.roleSearch = roleSearch;
+    }
+
+    public List<Role> getFilteredRoles() {
+        String q = roleSearch == null ? "" : roleSearch.trim().toLowerCase(Locale.ROOT);
+        if (q.isEmpty()) {
+            return roles;
+        }
+        return roles.stream()
+                .filter(r -> r.getName() != null && r.getName().toLowerCase(Locale.ROOT).contains(q))
+                .toList();
+    }
+
+    public List<Permission> permissionsFor(Role r) {
+        return permissionsByRoleId.getOrDefault(r.getId(), List.of());
     }
 
     public Role getEditRole() {

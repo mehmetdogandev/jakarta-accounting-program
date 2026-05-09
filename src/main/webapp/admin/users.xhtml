@@ -11,46 +11,75 @@
         <h:form id="mainForm">
             <p:messages id="msgs" showDetail="true" closable="true"/>
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h1 class="h4 mb-0">Kullanıcılar</h1>
-                <p:commandButton value="Ekle" icon="pi pi-plus" styleClass="ui-button-success"
-                                 actionListener="#{adminUsersBean.openNew}"
-                                 update="mainForm"
-                                 rendered="#{rbac.can('USER','CREATE')}"
-                                 oncomplete="PF('userDlg').show()"/>
-            </div>
+            <div class="admin-page-card">
+                <h1 class="admin-page-title">Sistem kullanıcıları</h1>
+                <p class="admin-page-lead">Kayıtlı kullanıcıları arayın; yetkiniz varsa yeni kullanıcı oluşturabilir veya mevcut kayıtları düzenleyebilirsiniz.</p>
 
-            <p:dataTable id="tbl" value="#{adminUsersBean.users}" var="u" paginator="true" rows="10"
-                         emptyMessage="Kayıt yok">
-                <p:column headerText="E-posta">
-                    <h:outputText value="#{u.email}"/>
-                </p:column>
-                <p:column headerText="Ad">
-                    <h:outputText value="#{u.name}"/>
-                </p:column>
-                <p:column headerText="Soyad">
-                    <h:outputText value="#{u.surname}"/>
-                </p:column>
-                <p:column headerText="İşlemler" style="width:200px">
-                    <p:commandButton icon="pi pi-pencil" title="Düzenle"
-                                     actionListener="#{adminUsersBean.openEdit(u)}"
+                <div class="admin-toolbar">
+                    <div class="admin-toolbar-grow admin-search-wrap">
+                        <span class="admin-search-icon pi pi-search" aria-hidden="true"/>
+                        <p:inputText id="userSearchInp" value="#{adminUsersBean.userSearch}"
+                                     placeholder="E-posta veya ad soyad ara…"
+                                     styleClass="w-100">
+                            <p:ajax event="keyup" delay="300" update="usersTablePanel"/>
+                        </p:inputText>
+                    </div>
+                    <p:commandButton id="colToggleBtn" type="button" value="Sütunlar" icon="pi pi-table"
+                                     styleClass="admin-btn-outline"/>
+                    <p:columnToggler datasource="usersTablePanel:usersTbl" trigger="colToggleBtn"/>
+                    <p:commandButton value="Yeni kullanıcı" icon="pi pi-plus" styleClass="admin-btn-primary"
+                                     actionListener="#{adminUsersBean.openNew}"
                                      update="mainForm"
-                                     rendered="#{rbac.can('USER','UPDATE')}"
+                                     rendered="#{rbac.can('USER','CREATE')}"
                                      oncomplete="PF('userDlg').show()"/>
-                    <p:commandButton icon="pi pi-trash" title="Sil"
-                                     styleClass="ui-button-danger ms-1"
-                                     actionListener="#{adminUsersBean.softDelete(u)}"
-                                     update="mainForm"
-                                     rendered="#{rbac.can('USER','DELETE')}">
-                        <p:confirm header="Onay" message="Kullanıcı soft-delete ile kaldırılsın mı?" icon="pi pi-exclamation-triangle"/>
-                    </p:commandButton>
-                </p:column>
-            </p:dataTable>
+                </div>
+
+                <p:outputPanel id="usersTablePanel" layout="block">
+                    <p:dataTable id="usersTbl" value="#{adminUsersBean.filteredUsers}" var="u"
+                                 paginator="true" rows="10" emptyMessage="Kayıt yok"
+                                 styleClass="admin-table">
+                        <p:column headerText="Kullanıcı" togglable="false">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="admin-avatar"><h:outputText value="#{adminUi.initials(u)}"/></span>
+                                <div>
+                                    <div class="admin-user-cell-name">
+                                        <h:outputText value="#{u.name} #{u.surname}"/>
+                                    </div>
+                                    <div class="admin-user-cell-sub">
+                                        <h:outputText value="#{u.email}"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </p:column>
+                        <p:column headerText="E-posta" togglable="true">
+                            <h:outputText value="#{u.email}"/>
+                        </p:column>
+                        <p:column headerText="Kayıt tarihi" togglable="true">
+                            <h:outputText value="#{adminUi.formatShortDate(u.createdAt)}"/>
+                        </p:column>
+                        <p:column headerText="İşlemler" style="width:120px" togglable="false">
+                            <p:commandButton icon="pi pi-pencil" title="Düzenle"
+                                             styleClass="admin-btn-icon"
+                                             actionListener="#{adminUsersBean.openEdit(u)}"
+                                             update="mainForm"
+                                             rendered="#{rbac.can('USER','UPDATE')}"
+                                             oncomplete="PF('userDlg').show()"/>
+                            <p:commandButton icon="pi pi-trash" title="Sil"
+                                             styleClass="admin-btn-icon admin-btn-danger-icon ms-1"
+                                             actionListener="#{adminUsersBean.softDelete(u)}"
+                                             update="mainForm"
+                                             rendered="#{rbac.can('USER','DELETE')}">
+                                <p:confirm header="Onay" message="Kullanıcı soft-delete ile kaldırılsın mı?" icon="pi pi-exclamation-triangle"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                </p:outputPanel>
+            </div>
 
             <p:confirmDialog global="true" showEffect="fade" hideEffect="fade"/>
 
             <p:dialog id="userDlg" header="Kullanıcı" widgetVar="userDlg" modal="true" appendTo="@body"
-                      dynamic="true" width="480">
+                      dynamic="true" width="480" styleClass="admin-dialog">
                 <h:panelGroup rendered="#{adminUsersBean.editUser != null}">
                     <div class="mb-2">
                         <label class="form-label">E-posta</label>

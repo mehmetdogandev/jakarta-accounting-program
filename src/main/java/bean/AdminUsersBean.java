@@ -16,6 +16,7 @@ import procedure.RbacProcedureBean;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 @Named
 @ViewScoped
@@ -29,6 +30,7 @@ public class AdminUsersBean implements Serializable {
 
     private List<AppUser> users = Collections.emptyList();
     private AppUser editUser;
+    private String userSearch = "";
 
     @PostConstruct
     public void init() {
@@ -108,6 +110,30 @@ public class AdminUsersBean implements Serializable {
 
     public List<AppUser> getUsers() {
         return users;
+    }
+
+    public String getUserSearch() {
+        return userSearch;
+    }
+
+    public void setUserSearch(String userSearch) {
+        this.userSearch = userSearch;
+    }
+
+    public List<AppUser> getFilteredUsers() {
+        String q = userSearch == null ? "" : userSearch.trim().toLowerCase(Locale.ROOT);
+        if (q.isEmpty()) {
+            return users;
+        }
+        return users.stream().filter(u -> matchesSearch(u, q)).toList();
+    }
+
+    private static boolean matchesSearch(AppUser u, String q) {
+        return contains(u.getEmail(), q) || contains(u.getName(), q) || contains(u.getSurname(), q);
+    }
+
+    private static boolean contains(String field, String q) {
+        return field != null && field.toLowerCase(Locale.ROOT).contains(q);
     }
 
     public AppUser getEditUser() {

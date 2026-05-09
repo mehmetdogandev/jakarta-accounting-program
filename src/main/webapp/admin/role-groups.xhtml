@@ -11,40 +11,75 @@
         <h:form id="mainForm">
             <p:messages id="msgs" showDetail="true" closable="true"/>
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h1 class="h4 mb-0">Rol grupları</h1>
-                <p:commandButton value="Ekle" icon="pi pi-plus" styleClass="ui-button-success"
-                                 actionListener="#{adminRoleGroupsBean.openNew}"
-                                 update="mainForm"
-                                 rendered="#{rbac.can('ROLE_GROUP','CREATE')}"
-                                 oncomplete="PF('rgDlg').show()"/>
-            </div>
+            <div class="admin-page-card">
+                <h1 class="admin-page-title">Rol grupları</h1>
+                <p class="admin-page-lead">Grupları başlık veya açıklamaya göre arayın; bağlı roller rozet olarak özetlenir.</p>
 
-            <p:dataTable value="#{adminRoleGroupsBean.groups}" var="g" paginator="true" rows="10" emptyMessage="Kayıt yok">
-                <p:column headerText="Başlık">
-                    <h:outputText value="#{g.title}"/>
-                </p:column>
-                <p:column headerText="Açıklama">
-                    <h:outputText value="#{g.description}"/>
-                </p:column>
-                <p:column headerText="İşlemler" style="width:200px">
-                    <p:commandButton icon="pi pi-pencil" title="Düzenle"
-                                     actionListener="#{adminRoleGroupsBean.openEdit(g)}"
+                <div class="admin-toolbar">
+                    <div class="admin-toolbar-grow admin-search-wrap">
+                        <span class="admin-search-icon pi pi-search" aria-hidden="true"/>
+                        <p:inputText value="#{adminRoleGroupsBean.groupSearch}"
+                                     placeholder="Başlık veya açıklama ara…"
+                                     styleClass="w-100">
+                            <p:ajax event="keyup" delay="300" update="rgTablePanel"/>
+                        </p:inputText>
+                    </div>
+                    <p:commandButton value="Yeni rol grubu" icon="pi pi-plus" styleClass="admin-btn-primary"
+                                     actionListener="#{adminRoleGroupsBean.openNew}"
                                      update="mainForm"
-                                     rendered="#{rbac.can('ROLE_GROUP','UPDATE')}"
+                                     rendered="#{rbac.can('ROLE_GROUP','CREATE')}"
                                      oncomplete="PF('rgDlg').show()"/>
-                    <p:commandButton icon="pi pi-trash" title="Sil" styleClass="ui-button-danger ms-1"
-                                     actionListener="#{adminRoleGroupsBean.softDelete(g)}"
-                                     update="mainForm"
-                                     rendered="#{rbac.can('ROLE_GROUP','DELETE')}">
-                        <p:confirm header="Onay" message="Grup soft-delete ile kaldırılsın mı?" icon="pi pi-exclamation-triangle"/>
-                    </p:commandButton>
-                </p:column>
-            </p:dataTable>
+                </div>
+
+                <p:outputPanel id="rgTablePanel" layout="block">
+                    <p:dataTable id="rgTbl" value="#{adminRoleGroupsBean.filteredGroups}" var="g"
+                                 paginator="true" rows="10" emptyMessage="Kayıt yok"
+                                 styleClass="admin-table">
+                        <p:column headerText="Grup">
+                            <div class="admin-rg-title">
+                                <h:outputText value="#{g.title}"/>
+                            </div>
+                            <div class="admin-rg-desc">
+                                <h:outputText value="#{g.description}"/>
+                            </div>
+                        </p:column>
+                        <p:column headerText="Roller">
+                            <ui:repeat value="#{adminRoleGroupsBean.linkedRolesTopThree(g)}" var="rn">
+                                <span class="admin-badge"><h:outputText value="#{rn}"/></span>
+                            </ui:repeat>
+                            <h:outputText value="+#{adminRoleGroupsBean.linkedRolesExtraCount(g)} daha"
+                                          rendered="#{adminRoleGroupsBean.linkedRolesExtraCount(g) gt 0}"
+                                          styleClass="admin-more-badge"/>
+                            <h:panelGroup rendered="#{adminRoleGroupsBean.linkedRolesExtraCount(g) eq 0 and empty adminRoleGroupsBean.linkedRolesTopThree(g)}">
+                                <span class="text-muted small">—</span>
+                            </h:panelGroup>
+                        </p:column>
+                        <p:column headerText="Oluşturulma" style="width:11rem">
+                            <h:outputText value="#{adminUi.formatShortDate(g.createdAt)}"/>
+                        </p:column>
+                        <p:column headerText="İşlemler" style="width:120px">
+                            <p:commandButton icon="pi pi-pencil" title="Düzenle"
+                                             styleClass="admin-btn-icon"
+                                             actionListener="#{adminRoleGroupsBean.openEdit(g)}"
+                                             update="mainForm"
+                                             rendered="#{rbac.can('ROLE_GROUP','UPDATE')}"
+                                             oncomplete="PF('rgDlg').show()"/>
+                            <p:commandButton icon="pi pi-trash" title="Sil"
+                                             styleClass="admin-btn-icon admin-btn-danger-icon ms-1"
+                                             actionListener="#{adminRoleGroupsBean.softDelete(g)}"
+                                             update="mainForm"
+                                             rendered="#{rbac.can('ROLE_GROUP','DELETE')}">
+                                <p:confirm header="Onay" message="Grup soft-delete ile kaldırılsın mı?" icon="pi pi-exclamation-triangle"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                </p:outputPanel>
+            </div>
 
             <p:confirmDialog global="true" showEffect="fade" hideEffect="fade"/>
 
-            <p:dialog id="rgDlg" header="Rol grubu" widgetVar="rgDlg" modal="true" appendTo="@body" dynamic="true" width="560">
+            <p:dialog id="rgDlg" header="Rol grubu" widgetVar="rgDlg" modal="true" appendTo="@body" dynamic="true"
+                      width="560" styleClass="admin-dialog">
                 <h:panelGroup rendered="#{adminRoleGroupsBean.editGroup != null}">
                     <div class="mb-2">
                         <label class="form-label">Başlık</label>
