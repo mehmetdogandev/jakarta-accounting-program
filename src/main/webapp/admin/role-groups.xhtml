@@ -68,8 +68,14 @@
                             <h:outputText value="#{adminUi.formatShortDate(g.createdAt)}"/>
                         </p:column>
                         <p:column headerText="İşlemler" style="width:9rem" togglable="false">
-                            <p:commandButton icon="pi pi-pencil" title="Düzenle"
+                            <p:commandButton icon="pi pi-eye" title="Detay"
                                              styleClass="admin-btn-icon"
+                                             actionListener="#{adminRoleGroupsBean.openDetail(g)}"
+                                             update="mainForm"
+                                             rendered="#{rbac.can('ROLE_GROUP','READ')}"
+                                             oncomplete="PF('rgDetailDlg').show()"/>
+                            <p:commandButton icon="pi pi-pencil" title="Düzenle"
+                                             styleClass="admin-btn-icon ms-1"
                                              actionListener="#{adminRoleGroupsBean.openEdit(g)}"
                                              update="mainForm"
                                              rendered="#{rbac.can('ROLE_GROUP','UPDATE')}"
@@ -89,28 +95,72 @@
 
             <p:confirmDialog global="true" showEffect="fade" hideEffect="fade"/>
 
-            <p:dialog id="rgDlg" header="Rol grubu" widgetVar="rgDlg" modal="true" appendTo="@body" dynamic="true"
-                      width="560" styleClass="admin-dialog">
-                <h:panelGroup rendered="#{adminRoleGroupsBean.editGroup != null}">
+            <p:dialog id="rgDetailDlg" header="Rol grubu özeti" widgetVar="rgDetailDlg" modal="true" appendTo="@body"
+                      dynamic="true" styleClass="admin-dialog" style="max-width: min(92vw, 520px); width: 100%;">
+                <h:panelGroup rendered="#{adminRoleGroupsBean.detailGroup != null}">
                     <div class="mb-2">
-                        <label class="form-label">Başlık</label>
-                        <p:inputText value="#{adminRoleGroupsBean.editGroup.title}" styleClass="form-control w-100"/>
+                        <div class="text-muted small text-uppercase">Başlık</div>
+                        <div class="fw-semibold"><h:outputText value="#{adminRoleGroupsBean.detailGroup.title}"/></div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Açıklama</label>
-                        <p:inputTextarea value="#{adminRoleGroupsBean.editGroup.description}" rows="3" styleClass="form-control w-100"/>
+                        <div class="text-muted small text-uppercase">Açıklama</div>
+                        <h:panelGroup styleClass="small">
+                            <h:outputText value="—" rendered="#{empty adminRoleGroupsBean.detailGroup.description}"/>
+                            <h:outputText value="#{adminRoleGroupsBean.detailGroup.description}"
+                                         rendered="#{not empty adminRoleGroupsBean.detailGroup.description}"/>
+                        </h:panelGroup>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Roller</label>
-                        <p:selectManyCheckbox id="rolesPick" value="#{adminRoleGroupsBean.selectedRoles}" layout="grid" columns="2">
-                            <f:selectItems value="#{adminRoleGroupsBean.assignableRoles}" var="role"
-                                           itemValue="#{role}" itemLabel="#{role.name} (#{role.scope})"/>
-                        </p:selectManyCheckbox>
+                    <div class="text-muted small text-uppercase mb-2">Bağlı roller</div>
+                    <div class="admin-user-assign-section">
+                        <ui:repeat value="#{adminRoleGroupsBean.detailGroupRoleNames}" var="rn">
+                            <span class="admin-badge me-1 mb-1 d-inline-block"><h:outputText value="#{rn}"/></span>
+                        </ui:repeat>
+                        <h:panelGroup rendered="#{empty adminRoleGroupsBean.detailGroupRoleNames}">
+                            <span class="text-muted small">Bağlı rol yok.</span>
+                        </h:panelGroup>
                     </div>
-                    <p:commandButton value="Kaydet" icon="pi pi-check" action="#{adminRoleGroupsBean.save}"
-                                     update="mainForm" process="@form"/>
-                    <p:commandButton value="İptal" icon="pi pi-times" type="button" styleClass="ui-button-secondary ms-2"
-                                     onclick="PF('rgDlg').hide()"/>
+                    <p:commandButton value="Kapat" type="button" styleClass="ui-button-secondary mt-3"
+                                     onclick="PF('rgDetailDlg').hide()"/>
+                </h:panelGroup>
+            </p:dialog>
+
+            <p:dialog id="rgDlg" header="Rol grubu" widgetVar="rgDlg" modal="true" appendTo="@body" dynamic="true"
+                      responsive="true" styleClass="admin-dialog admin-rg-dialog"
+                      style="max-width: min(92vw, 720px); width: 100%;">
+                <h:panelGroup rendered="#{adminRoleGroupsBean.editGroup != null}">
+                    <div class="row g-3">
+                        <div class="col-lg-5">
+                            <h3 class="h6 text-muted text-uppercase small mb-2">Grup bilgisi</h3>
+                            <div class="mb-2">
+                                <label class="form-label">Başlık</label>
+                                <p:inputText value="#{adminRoleGroupsBean.editGroup.title}" styleClass="form-control w-100"/>
+                            </div>
+                            <div class="mb-0">
+                                <label class="form-label">Açıklama</label>
+                                <p:inputTextarea value="#{adminRoleGroupsBean.editGroup.description}" rows="5" styleClass="form-control w-100"/>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <h3 class="h6 text-muted text-uppercase small mb-2">Roller</h3>
+                            <p:inputText value="#{adminRoleGroupsBean.assignableRoleFilter}" placeholder="Rol adı veya kapsam filtrele…"
+                                         styleClass="form-control mb-2">
+                                <p:ajax event="keyup" delay="250" update="mainForm:rgDlgRolesPanel"/>
+                            </p:inputText>
+                            <p:outputPanel id="rgDlgRolesPanel" layout="block" styleClass="admin-rg-dialog-roles">
+                                <p:selectManyCheckbox id="rolesPick" value="#{adminRoleGroupsBean.selectedRoles}"
+                                                      layout="pageDirection" styleClass="admin-rg-role-checkboxes">
+                                    <f:selectItems value="#{adminRoleGroupsBean.filteredAssignableRoles}" var="role"
+                                                   itemValue="#{role}" itemLabel="#{role.name} (#{role.scope})"/>
+                                </p:selectManyCheckbox>
+                            </p:outputPanel>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mt-3 pt-3 border-top">
+                        <p:commandButton value="Kaydet" icon="pi pi-check" action="#{adminRoleGroupsBean.save}"
+                                         update="mainForm" process="@form" styleClass="admin-btn-primary"/>
+                        <p:commandButton value="İptal" icon="pi pi-times" type="button" styleClass="ui-button-secondary"
+                                         onclick="PF('rgDlg').hide()"/>
+                    </div>
                 </h:panelGroup>
             </p:dialog>
         </h:form>

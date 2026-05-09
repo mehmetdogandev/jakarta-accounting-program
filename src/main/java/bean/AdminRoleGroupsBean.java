@@ -39,8 +39,10 @@ public class AdminRoleGroupsBean implements Serializable {
     private Map<UUID, List<String>> linkedRoleNamesByGroupId = Collections.emptyMap();
     private List<Role> assignableRoles = Collections.emptyList();
     private RoleGroup editGroup;
+    private RoleGroup detailGroup;
     private List<Role> selectedRoles = new ArrayList<>();
     private String groupSearch = "";
+    private String assignableRoleFilter = "";
 
     @PostConstruct
     public void init() {
@@ -78,6 +80,7 @@ public class AdminRoleGroupsBean implements Serializable {
         }
         editGroup = new RoleGroup();
         selectedRoles = new ArrayList<>();
+        assignableRoleFilter = "";
     }
 
     public void openEdit(RoleGroup row) {
@@ -87,12 +90,21 @@ public class AdminRoleGroupsBean implements Serializable {
         RoleGroup loaded = roleGroupFacade.findById(row.getId());
         this.editGroup = loaded != null ? loaded : row;
         selectedRoles = new ArrayList<>();
+        assignableRoleFilter = "";
         for (UUID id : roleGroupFacade.linkedRoleIds(editGroup.getId())) {
             Role r = roleFacade.findById(id);
             if (r != null) {
                 selectedRoles.add(r);
             }
         }
+    }
+
+    public void openDetail(RoleGroup row) {
+        if (!rbacProcedure.require(Scope.ROLE_GROUP, Permission.READ)) {
+            return;
+        }
+        RoleGroup loaded = roleGroupFacade.findById(row.getId());
+        this.detailGroup = loaded != null ? loaded : row;
     }
 
     public void save() {
@@ -175,6 +187,36 @@ public class AdminRoleGroupsBean implements Serializable {
 
     public List<Role> getAssignableRoles() {
         return assignableRoles;
+    }
+
+    public List<Role> getFilteredAssignableRoles() {
+        String f = assignableRoleFilter == null ? "" : assignableRoleFilter.trim().toLowerCase(Locale.ROOT);
+        if (f.isEmpty()) {
+            return assignableRoles;
+        }
+        return assignableRoles.stream()
+                .filter(r -> (r.getName() != null && r.getName().toLowerCase(Locale.ROOT).contains(f))
+                        || (r.getScope() != null && r.getScope().name().toLowerCase(Locale.ROOT).contains(f)))
+                .toList();
+    }
+
+    public String getAssignableRoleFilter() {
+        return assignableRoleFilter;
+    }
+
+    public void setAssignableRoleFilter(String assignableRoleFilter) {
+        this.assignableRoleFilter = assignableRoleFilter;
+    }
+
+    public RoleGroup getDetailGroup() {
+        return detailGroup;
+    }
+
+    public List<String> getDetailGroupRoleNames() {
+        if (detailGroup == null || detailGroup.getId() == null) {
+            return List.of();
+        }
+        return linkedRoleNamesByGroupId.getOrDefault(detailGroup.getId(), List.of());
     }
 
     public List<Role> getSelectedRoles() {

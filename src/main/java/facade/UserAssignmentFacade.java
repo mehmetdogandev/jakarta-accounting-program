@@ -127,15 +127,19 @@ public class UserAssignmentFacade extends AbstractFacade implements UserAssignme
             entityManager.flush();
             return;
         }
+        boolean restored = false;
         for (UserRole ur : existing) {
             if (ur.getDeletedAt() == null) {
                 return;
             }
-            ur.setDeletedAt(null);
-            ur.setDeletedBy(null);
-            ur.setLastUpdatedBy(actorUserId);
-            ur.setUpdatedAt(now);
-            entityManager.merge(ur);
+            if (!restored) {
+                ur.setDeletedAt(null);
+                ur.setDeletedBy(null);
+                ur.setLastUpdatedBy(actorUserId);
+                ur.setUpdatedAt(now);
+                entityManager.merge(ur);
+                restored = true;
+            }
         }
         entityManager.flush();
     }
@@ -181,15 +185,19 @@ public class UserAssignmentFacade extends AbstractFacade implements UserAssignme
             entityManager.flush();
             return;
         }
+        boolean restored = false;
         for (UserRoleGroup urg : existing) {
             if (urg.getDeletedAt() == null) {
                 return;
             }
-            urg.setDeletedAt(null);
-            urg.setDeletedBy(null);
-            urg.setLastUpdatedBy(actorUserId);
-            urg.setUpdatedAt(now);
-            entityManager.merge(urg);
+            if (!restored) {
+                urg.setDeletedAt(null);
+                urg.setDeletedBy(null);
+                urg.setLastUpdatedBy(actorUserId);
+                urg.setUpdatedAt(now);
+                entityManager.merge(urg);
+                restored = true;
+            }
         }
         entityManager.flush();
     }

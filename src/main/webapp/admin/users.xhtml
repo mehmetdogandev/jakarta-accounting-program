@@ -151,7 +151,7 @@
                                                      styleClass="admin-btn-icon admin-chip-remove p-0"
                                                      actionListener="#{adminUsersBean.removeAssignedRole(ar)}"
                                                      update="mainForm:assignedBlocks mainForm:rolePickerPanel mainForm:msgs"
-                                                     rendered="#{adminUsersBean.canManageAssignments() and rbac.can('ROLE','READ')}"/>
+                                                     rendered="#{adminUsersBean.canManageAssignments()}"/>
                                 </span>
                             </ui:repeat>
                             <h:panelGroup rendered="#{empty adminUsersBean.assignedRoles}">
@@ -168,7 +168,7 @@
                                                      styleClass="admin-btn-icon admin-chip-remove p-0"
                                                      actionListener="#{adminUsersBean.removeAssignedRoleGroup(ag)}"
                                                      update="mainForm:assignedBlocks mainForm:groupPickerPanel mainForm:msgs"
-                                                     rendered="#{adminUsersBean.canManageAssignments() and rbac.can('ROLE_GROUP','READ')}"/>
+                                                     rendered="#{adminUsersBean.canManageAssignments()}"/>
                                 </span>
                             </ui:repeat>
                             <h:panelGroup rendered="#{empty adminUsersBean.assignedRoleGroups}">
@@ -183,7 +183,7 @@
                                     <p:inputText value="#{adminUsersBean.rolePickerSearch}" placeholder="Rol adı ara…"
                                                  styleClass="form-control mb-2">
                                         <p:ajax event="keyup" delay="350" listener="#{adminUsersBean.refreshRolePicker}"
-                                                update="rolePickerPanel msgs"/>
+                                                update="mainForm:rolePickerPanel mainForm:msgs"/>
                                     </p:inputText>
                                     <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
                                         <h:outputText value="#{adminUsersBean.pickerRolesPageStart}–#{adminUsersBean.pickerRolesPageEnd} / #{adminUsersBean.pickerRolesCount}"/>
@@ -191,11 +191,11 @@
                                             <p:commandButton icon="pi pi-angle-left" styleClass="ui-button-secondary"
                                                              actionListener="#{adminUsersBean.pickerRolesPrev}"
                                                              disabled="#{not adminUsersBean.pickerRolesHasPrev}"
-                                                             update="rolePickerPanel"/>
+                                                             update="mainForm:rolePickerPanel"/>
                                             <p:commandButton icon="pi pi-angle-right" styleClass="ui-button-secondary"
                                                              actionListener="#{adminUsersBean.pickerRolesNext}"
                                                              disabled="#{not adminUsersBean.pickerRolesHasNext}"
-                                                             update="rolePickerPanel"/>
+                                                             update="mainForm:rolePickerPanel"/>
                                         </div>
                                     </div>
                                     <div class="admin-picker-list">
@@ -209,7 +209,7 @@
                                                                  styleClass="admin-btn-outline btn-sm"
                                                                  actionListener="#{adminUsersBean.assignPickerRole(pr)}"
                                                                  update="mainForm:assignedBlocks mainForm:rolePickerPanel mainForm:msgs"
-                                                                 rendered="#{rbac.can('ROLE','READ')}"/>
+                                                                 rendered="#{adminUsersBean.canManageAssignments()}"/>
                                             </div>
                                         </ui:repeat>
                                         <h:panelGroup rendered="#{empty adminUsersBean.pickerRoles}">
@@ -223,7 +223,7 @@
                                     <p:inputText value="#{adminUsersBean.groupPickerSearch}" placeholder="Başlık veya açıklama ara…"
                                                  styleClass="form-control mb-2">
                                         <p:ajax event="keyup" delay="350" listener="#{adminUsersBean.refreshGroupPicker}"
-                                                update="groupPickerPanel msgs"/>
+                                                update="mainForm:groupPickerPanel mainForm:msgs"/>
                                     </p:inputText>
                                     <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
                                         <h:outputText value="#{adminUsersBean.pickerGroupsPageStart}–#{adminUsersBean.pickerGroupsPageEnd} / #{adminUsersBean.pickerRoleGroupsCount}"/>
@@ -231,11 +231,11 @@
                                             <p:commandButton icon="pi pi-angle-left" styleClass="ui-button-secondary"
                                                              actionListener="#{adminUsersBean.pickerGroupsPrev}"
                                                              disabled="#{not adminUsersBean.pickerGroupsHasPrev}"
-                                                             update="groupPickerPanel"/>
+                                                             update="mainForm:groupPickerPanel"/>
                                             <p:commandButton icon="pi pi-angle-right" styleClass="ui-button-secondary"
                                                              actionListener="#{adminUsersBean.pickerGroupsNext}"
                                                              disabled="#{not adminUsersBean.pickerGroupsHasNext}"
-                                                             update="groupPickerPanel"/>
+                                                             update="mainForm:groupPickerPanel"/>
                                         </div>
                                     </div>
                                     <div class="admin-picker-list">
@@ -251,7 +251,7 @@
                                                                  styleClass="admin-btn-outline btn-sm"
                                                                  actionListener="#{adminUsersBean.assignPickerRoleGroup(pg)}"
                                                                  update="mainForm:assignedBlocks mainForm:groupPickerPanel mainForm:msgs"
-                                                                 rendered="#{rbac.can('ROLE_GROUP','READ')}"/>
+                                                                 rendered="#{adminUsersBean.canManageAssignments()}"/>
                                             </div>
                                         </ui:repeat>
                                         <h:panelGroup rendered="#{empty adminUsersBean.pickerRoleGroups}">

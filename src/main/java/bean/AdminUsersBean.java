@@ -185,9 +185,6 @@ public class AdminUsersBean implements Serializable {
         if (!rbacProcedure.require(Scope.USER, Permission.UPDATE)) {
             return;
         }
-        if (!rbacProcedure.require(Scope.ROLE, Permission.READ)) {
-            return;
-        }
         String actor = rbacProcedure.currentUserId().orElse(null);
         assignmentFacade.assignRole(editUser.getId(), role.getId(), actor);
         loadAssignments();
@@ -210,9 +207,6 @@ public class AdminUsersBean implements Serializable {
             return;
         }
         if (!rbacProcedure.require(Scope.USER, Permission.UPDATE)) {
-            return;
-        }
-        if (!rbacProcedure.require(Scope.ROLE_GROUP, Permission.READ)) {
             return;
         }
         String actor = rbacProcedure.currentUserId().orElse(null);

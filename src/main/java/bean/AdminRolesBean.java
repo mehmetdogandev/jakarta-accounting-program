@@ -35,6 +35,7 @@ public class AdminRolesBean implements Serializable {
     private List<Role> roles = Collections.emptyList();
     private Map<UUID, List<Permission>> permissionsByRoleId = Collections.emptyMap();
     private Role editRole;
+    private Role detailRole;
     private List<Permission> selectedPermissions = new ArrayList<>();
     private String roleSearch = "";
 
@@ -69,6 +70,14 @@ public class AdminRolesBean implements Serializable {
 
     public List<Scope> getScopeOptions() {
         return Arrays.asList(Scope.values());
+    }
+
+    public void openDetail(Role row) {
+        if (!rbacProcedure.require(Scope.ROLE, Permission.READ)) {
+            return;
+        }
+        Role loaded = roleFacade.findById(row.getId());
+        this.detailRole = loaded != null ? loaded : row;
     }
 
     public void openNew() {
@@ -141,6 +150,17 @@ public class AdminRolesBean implements Serializable {
 
     public List<Permission> permissionsFor(Role r) {
         return permissionsByRoleId.getOrDefault(r.getId(), List.of());
+    }
+
+    public Role getDetailRole() {
+        return detailRole;
+    }
+
+    public List<Permission> getDetailPermissions() {
+        if (detailRole == null || detailRole.getId() == null) {
+            return List.of();
+        }
+        return permissionsByRoleId.getOrDefault(detailRole.getId(), List.of());
     }
 
     public Role getEditRole() {
