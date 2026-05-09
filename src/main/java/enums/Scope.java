@@ -9,5 +9,6 @@ public enum Scope {
     CASH_ACCOUNT,
     BANK_ACCOUNT,
     PRODUCT,
-    STOCK_MOVEMENT
+    STOCK_MOVEMENT,
+    CHEQUE
 }

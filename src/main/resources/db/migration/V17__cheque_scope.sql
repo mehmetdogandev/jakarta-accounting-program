@@ -1,0 +1,1 @@
+ALTER TYPE app_scope ADD VALUE 'CHEQUE';

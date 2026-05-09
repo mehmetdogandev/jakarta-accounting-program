@@ -1,0 +1,193 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/admin.xhtml">
+
+    <ui:define name="title">Çek / Senet</ui:define>
+
+    <ui:define name="topbar">
+        <span class="admin-app-topbar-heading">Çek / Senet</span>
+    </ui:define>
+
+    <ui:define name="content">
+        <h:form id="mainForm">
+            <p:messages id="msgs" showDetail="true" closable="true"/>
+
+            <h:panelGroup rendered="#{adminChequeBean.dueSoonCount gt 0}">
+                <p:message severity="warn" summary="Vade uyarısı"
+                           detail="7 gün içinde vadesi dolan #{adminChequeBean.dueSoonCount} çek var."/>
+            </h:panelGroup>
+
+            <div class="admin-page-card">
+                <h1 class="admin-page-title">Çek listesi</h1>
+
+                <div class="admin-toolbar">
+                    <div class="admin-toolbar-grow">
+                        <p:selectOneMenu value="#{adminChequeBean.filterType}" styleClass="w-100">
+                            <f:selectItem itemValue="" itemLabel="Tür: Tümü"/>
+                            <f:selectItem itemValue="RECEIVED" itemLabel="Alınan"/>
+                            <f:selectItem itemValue="ISSUED" itemLabel="Verilen"/>
+                            <p:ajax listener="#{adminChequeBean.refresh}" update="mainForm:chequeTable"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="admin-toolbar-grow">
+                        <p:selectOneMenu value="#{adminChequeBean.filterStatus}" styleClass="w-100">
+                            <f:selectItem itemValue="" itemLabel="Durum: Tümü"/>
+                            <f:selectItems value="#{adminChequeBean.statusOptions}" var="s" itemValue="#{s}" itemLabel="#{s}"/>
+                            <p:ajax listener="#{adminChequeBean.refresh}" update="mainForm:chequeTable"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="admin-toolbar-actions">
+                        <p:autoComplete value="#{adminChequeBean.selectedBankAccount}"
+                                        completeMethod="#{adminChequeBean.completeBankAccount}"
+                                        var="ba"
+                                        itemLabel="#{ba.code} - #{ba.bankName}"
+                                        itemValue="#{ba}"
+                                        converter="bankAccountConverter"
+                                        forceSelection="true"
+                                        dropdown="true"
+                                        placeholder="Aksiyon bankası seç..."/>
+                        <p:commandButton value="Yeni çek" icon="pi pi-plus"
+                                         styleClass="admin-btn-primary"
+                                         rendered="#{rbac.can('CHEQUE','CREATE')}"
+                                         actionListener="#{adminChequeBean.openNew}"
+                                         update="mainForm"
+                                         oncomplete="PF('chequeDlg').show()"/>
+                    </div>
+                </div>
+
+                <p:dataTable id="chequeTable" value="#{adminChequeBean.cheques}" var="c"
+                             paginator="true" rows="10" paginatorPosition="bottom"
+                             emptyMessage="Kayıt yok" styleClass="admin-table">
+                    <p:column headerText="Çek no">
+                        <h:outputText value="#{c.chequeNumber}"/>
+                    </p:column>
+                    <p:column headerText="Tür">
+                        <span class="#{adminChequeBean.typeBadgeClass(c.chequeType)}">
+                            <h:outputText value="#{c.chequeType}"/>
+                        </span>
+                    </p:column>
+                    <p:column headerText="Cari">
+                        <h:outputText value="#{c.currentAccount.name}"/>
+                    </p:column>
+                    <p:column headerText="Banka">
+                        <h:outputText value="#{empty c.bankName ? '—' : c.bankName}"/>
+                    </p:column>
+                    <p:column headerText="Tutar">
+                        <h:outputText value="#{adminChequeBean.formatCurrency(c.amount)}"/>
+                    </p:column>
+                    <p:column headerText="Vade">
+                        <span class="#{adminChequeBean.overdue(c) ? 'text-danger fw-semibold' : ''}">
+                            <h:outputText value="#{c.dueDate}"/>
+                        </span>
+                    </p:column>
+                    <p:column headerText="Durum">
+                        <span class="#{adminChequeBean.statusBadgeClass(c.status)}">
+                            <h:outputText value="#{c.status}"/>
+                        </span>
+                    </p:column>
+                    <p:column headerText="İşlemler" style="width:18rem">
+                        <p:commandButton value="Bankaya yatır" icon="pi pi-arrow-right"
+                                         styleClass="ui-button-secondary btn-sm"
+                                         rendered="#{rbac.can('CHEQUE','UPDATE') and adminChequeBean.canDeposit(c)}"
+                                         actionListener="#{adminChequeBean.deposit(c)}"
+                                         update="mainForm"/>
+                        <p:commandButton value="Tahsil" icon="pi pi-check"
+                                         styleClass="ui-button-secondary btn-sm ms-1"
+                                         rendered="#{rbac.can('CHEQUE','UPDATE') and adminChequeBean.canCollect(c)}"
+                                         actionListener="#{adminChequeBean.collect(c)}"
+                                         update="mainForm"/>
+                        <p:commandButton value="İade" icon="pi pi-replay"
+                                         styleClass="ui-button-secondary btn-sm ms-1"
+                                         rendered="#{rbac.can('CHEQUE','UPDATE') and adminChequeBean.canReturn(c)}"
+                                         actionListener="#{adminChequeBean.returnCheque(c)}"
+                                         update="mainForm"/>
+                        <p:commandButton value="Protesto" icon="pi pi-exclamation-triangle"
+                                         styleClass="ui-button-secondary btn-sm ms-1"
+                                         rendered="#{rbac.can('CHEQUE','UPDATE') and adminChequeBean.canProtest(c)}"
+                                         actionListener="#{adminChequeBean.protest(c)}"
+                                         update="mainForm"/>
+                        <p:commandButton value="Öde" icon="pi pi-wallet"
+                                         styleClass="ui-button-secondary btn-sm ms-1"
+                                         rendered="#{rbac.can('CHEQUE','UPDATE') and adminChequeBean.canPay(c)}"
+                                         actionListener="#{adminChequeBean.pay(c)}"
+                                         update="mainForm"/>
+                    </p:column>
+                </p:dataTable>
+            </div>
+
+            <p:dialog id="chequeDlg" header="Yeni çek" widgetVar="chequeDlg" modal="true"
+                      appendTo="@body" dynamic="true" responsive="true"
+                      styleClass="admin-dialog admin-dialog-form" style="max-width: min(92vw, 760px); width: 100%;">
+                <h:panelGroup rendered="#{adminChequeBean.selected != null}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Çek no</label>
+                            <p:inputText value="#{adminChequeBean.selected.chequeNumber}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tip</label>
+                            <p:selectOneMenu value="#{adminChequeBean.selected.chequeType}" styleClass="w-100">
+                                <f:selectItems value="#{adminChequeBean.typeOptions}" var="t" itemValue="#{t}" itemLabel="#{t}"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tutar</label>
+                            <p:inputText value="#{adminChequeBean.selected.amount}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Cari</label>
+                            <p:autoComplete value="#{adminChequeBean.selectedCurrentAccount}"
+                                            completeMethod="#{adminChequeBean.completeCurrentAccount}"
+                                            var="ca"
+                                            itemLabel="#{ca.code} - #{ca.name}"
+                                            itemValue="#{ca}"
+                                            converter="currentAccountConverter"
+                                            forceSelection="true"
+                                            dropdown="true"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Banka hesabı</label>
+                            <p:autoComplete value="#{adminChequeBean.selectedBankAccount}"
+                                            completeMethod="#{adminChequeBean.completeBankAccount}"
+                                            var="ba"
+                                            itemLabel="#{ba.code} - #{ba.bankName}"
+                                            itemValue="#{ba}"
+                                            converter="bankAccountConverter"
+                                            forceSelection="true"
+                                            dropdown="true"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Banka adı</label>
+                            <p:inputText value="#{adminChequeBean.selected.bankName}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Şube</label>
+                            <p:inputText value="#{adminChequeBean.selected.branch}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Düzenlenme tarihi</label>
+                            <p:datePicker value="#{adminChequeBean.selected.issueDate}" pattern="yyyy-MM-dd"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Vade tarihi</label>
+                            <p:datePicker value="#{adminChequeBean.selected.dueDate}" pattern="yyyy-MM-dd"/>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Not</label>
+                            <p:inputTextarea value="#{adminChequeBean.selected.notes}" rows="3" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                    </div>
+                    <div class="admin-dialog-footer d-flex justify-content-end gap-2">
+                        <p:commandButton value="Kaydet" icon="pi pi-check" styleClass="admin-btn-primary"
+                                         action="#{adminChequeBean.save}" update="mainForm" process="@form"/>
+                        <p:commandButton value="Kapat" icon="pi pi-times" type="button" styleClass="ui-button-secondary"
+                                         onclick="PF('chequeDlg').hide()"/>
+                    </div>
+                </h:panelGroup>
+            </p:dialog>
+        </h:form>
+    </ui:define>
+</ui:composition>

@@ -84,6 +84,11 @@
                             rendered="#{rbac.can('STOCK_MOVEMENT','ACCESS')}">
                         Stok hareketleri
                     </h:link>
+                    <h:link outcome="/admin/cheques"
+                            styleClass="#{view.viewId == '/admin/cheques.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                            rendered="#{rbac.can('CHEQUE','ACCESS')}">
+                        Çek / Senet
+                    </h:link>
                 </div>
             </details>
         </nav>
