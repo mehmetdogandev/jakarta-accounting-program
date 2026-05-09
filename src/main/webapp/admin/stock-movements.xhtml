@@ -1,0 +1,111 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/admin.xhtml">
+
+    <ui:define name="title">Stok hareketleri</ui:define>
+
+    <ui:define name="topbar">
+        <span class="admin-app-topbar-heading">Stok hareketleri</span>
+    </ui:define>
+
+    <ui:define name="content">
+        <h:form id="mainForm">
+            <p:messages id="msgs" showDetail="true" closable="true"/>
+
+            <div class="admin-page-card">
+                <h1 class="admin-page-title">Stok hareketleri</h1>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-lg-4">
+                        <label class="form-label">Ürün seçimi</label>
+                        <p:autoComplete value="#{adminStockMovementBean.selectedProduct}"
+                                        completeMethod="#{adminStockMovementBean.completeProduct}"
+                                        var="p"
+                                        itemLabel="#{p.code} - #{p.name}"
+                                        itemValue="#{p}"
+                                        converter="productConverter"
+                                        forceSelection="true"
+                                        dropdown="true">
+                            <p:ajax event="itemSelect" listener="#{adminStockMovementBean.refreshMovements}" update="mainForm"/>
+                        </p:autoComplete>
+                    </div>
+                    <div class="col-lg-3">
+                        <label class="form-label">Başlangıç</label>
+                        <p:datePicker value="#{adminStockMovementBean.filterFrom}" pattern="yyyy-MM-dd">
+                            <p:ajax event="dateSelect" listener="#{adminStockMovementBean.refreshMovements}" update="mainForm:movementTable"/>
+                        </p:datePicker>
+                    </div>
+                    <div class="col-lg-3">
+                        <label class="form-label">Bitiş</label>
+                        <p:datePicker value="#{adminStockMovementBean.filterTo}" pattern="yyyy-MM-dd">
+                            <p:ajax event="dateSelect" listener="#{adminStockMovementBean.refreshMovements}" update="mainForm:movementTable"/>
+                        </p:datePicker>
+                    </div>
+                    <div class="col-lg-2 d-flex align-items-end">
+                        <p:commandButton value="Yenile" icon="pi pi-refresh"
+                                         actionListener="#{adminStockMovementBean.refreshMovements}"
+                                         update="mainForm"
+                                         styleClass="ui-button-secondary w-100"/>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-lg-2">
+                        <label class="form-label">Tür</label>
+                        <p:selectOneMenu value="#{adminStockMovementBean.newMovement.movementType}" styleClass="w-100">
+                            <f:selectItems value="#{adminStockMovementBean.movementTypes}" var="t" itemValue="#{t}" itemLabel="#{t}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="col-lg-2">
+                        <label class="form-label">Miktar</label>
+                        <p:inputText value="#{adminStockMovementBean.newMovement.quantity}" styleClass="form-control w-100 admin-dialog-input"/>
+                    </div>
+                    <div class="col-lg-2">
+                        <label class="form-label">Birim maliyet</label>
+                        <p:inputText value="#{adminStockMovementBean.newMovement.unitCost}" styleClass="form-control w-100 admin-dialog-input"/>
+                    </div>
+                    <div class="col-lg-3">
+                        <label class="form-label">Açıklama</label>
+                        <p:inputText value="#{adminStockMovementBean.newMovement.description}" styleClass="form-control w-100 admin-dialog-input"/>
+                    </div>
+                    <div class="col-lg-3 d-flex align-items-end">
+                        <p:commandButton value="Hareket ekle" icon="pi pi-plus"
+                                         rendered="#{rbac.can('STOCK_MOVEMENT','CREATE')}"
+                                         action="#{adminStockMovementBean.saveMovement}"
+                                         update="mainForm"
+                                         process="@form"
+                                         styleClass="admin-btn-primary w-100"/>
+                    </div>
+                </div>
+
+                <p:dataTable id="movementTable" value="#{adminStockMovementBean.movements}" var="m"
+                             paginator="true" rows="10" paginatorPosition="bottom"
+                             emptyMessage="Hareket kaydı yok." styleClass="admin-table">
+                    <p:column headerText="Tarih">
+                        <h:outputText value="#{m.movementDate}"/>
+                    </p:column>
+                    <p:column headerText="Tür">
+                        <span class="#{adminStockMovementBean.movementBadgeClass(m.movementType)}">
+                            <h:outputText value="#{m.movementType}"/>
+                        </span>
+                    </p:column>
+                    <p:column headerText="Miktar">
+                        <h:outputText value="#{m.quantity}"/>
+                    </p:column>
+                    <p:column headerText="Birim maliyet">
+                        <h:outputText value="#{adminStockMovementBean.formatCurrency(m.unitCost)}"/>
+                    </p:column>
+                    <p:column headerText="Açıklama">
+                        <h:outputText value="#{m.description}"/>
+                    </p:column>
+                    <p:column headerText="Referans">
+                        <h:outputText value="#{empty m.referenceType ? '—' : m.referenceType}"/>
+                    </p:column>
+                </p:dataTable>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>

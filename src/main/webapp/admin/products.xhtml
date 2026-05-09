@@ -1,0 +1,172 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/admin.xhtml">
+
+    <ui:define name="title">Ürünler</ui:define>
+
+    <ui:define name="topbar">
+        <span class="admin-app-topbar-heading">Ürünler</span>
+    </ui:define>
+
+    <ui:define name="content">
+        <h:form id="mainForm">
+            <p:messages id="msgs" showDetail="true" closable="true"/>
+
+            <div class="admin-page-card">
+                <h1 class="admin-page-title">Ürün yönetimi</h1>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <div class="admin-dash-card">
+                            Toplam ürün
+                            <div class="h4 mb-0"><h:outputText value="#{adminProductBean.products.size()}"/></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="admin-dash-card">
+                            Aktif ürün
+                            <div class="h4 mb-0"><h:outputText value="#{adminProductBean.activeCount}"/></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="admin-dash-card">
+                            Düşük stok
+                            <div class="h4 mb-0 text-danger">
+                                <span class="badge text-bg-danger"><h:outputText value="#{adminProductBean.lowStockCount}"/></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-toolbar">
+                    <div class="admin-toolbar-grow">
+                        <p:selectOneMenu styleClass="w-100" disabled="true">
+                            <f:selectItem itemLabel="Kategori filtresi (yakında)"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="admin-toolbar-actions">
+                        <p:commandButton value="Yeni ürün" icon="pi pi-plus" styleClass="admin-btn-primary"
+                                         rendered="#{rbac.can('PRODUCT','CREATE')}"
+                                         actionListener="#{adminProductBean.openNew}"
+                                         update="mainForm"
+                                         oncomplete="PF('productDlg').show()"/>
+                    </div>
+                </div>
+
+                <p:dataTable id="productsTable" value="#{adminProductBean.products}" var="p"
+                             paginator="true" rows="10" paginatorPosition="bottom"
+                             emptyMessage="Ürün bulunamadı" styleClass="admin-table">
+                    <p:column headerText="Kod">
+                        <h:outputText value="#{p.code}"/>
+                    </p:column>
+                    <p:column headerText="Barkod">
+                        <h:outputText value="#{empty p.barcode ? '—' : p.barcode}"/>
+                    </p:column>
+                    <p:column headerText="Ad">
+                        <h:outputText value="#{p.name}"/>
+                    </p:column>
+                    <p:column headerText="Kategori">
+                        <h:outputText value="#{p.category != null ? p.category.name : '—'}"/>
+                    </p:column>
+                    <p:column headerText="Birim">
+                        <h:outputText value="#{p.unit}"/>
+                    </p:column>
+                    <p:column headerText="Stok">
+                        <span class="#{p.stockQuantity lt p.minStockQuantity ? 'text-danger fw-semibold' : ''}">
+                            <h:outputText value="#{p.stockQuantity}"/>
+                        </span>
+                    </p:column>
+                    <p:column headerText="Satış fiyatı">
+                        <h:outputText value="#{adminProductBean.formatCurrency(p.salesPrice)}"/>
+                    </p:column>
+                    <p:column headerText="Durum">
+                        <span class="#{p.active ? 'badge text-bg-success' : 'badge text-bg-secondary'}">
+                            <h:outputText value="#{p.active ? 'Aktif' : 'Pasif'}"/>
+                        </span>
+                    </p:column>
+                    <p:column headerText="İşlemler" style="width:12rem">
+                        <p:commandButton icon="pi pi-pencil" styleClass="admin-btn-icon"
+                                         rendered="#{rbac.can('PRODUCT','UPDATE')}"
+                                         actionListener="#{adminProductBean.openEdit(p)}"
+                                         update="mainForm"
+                                         oncomplete="PF('productDlg').show()"/>
+                        <p:commandButton icon="pi pi-box" styleClass="admin-btn-icon ms-1"
+                                         rendered="#{rbac.can('STOCK_MOVEMENT','ACCESS')}"
+                                         actionListener="#{adminProductBean.openStockMovement(p)}"
+                                         process="@this"/>
+                        <p:commandButton icon="pi pi-trash" styleClass="admin-btn-icon admin-btn-danger-icon ms-1"
+                                         rendered="#{rbac.can('PRODUCT','DELETE')}"
+                                         actionListener="#{adminProductBean.softDelete(p)}"
+                                         update="mainForm"/>
+                    </p:column>
+                </p:dataTable>
+            </div>
+
+            <p:dialog id="productDlg" header="Ürün kartı" widgetVar="productDlg"
+                      modal="true" appendTo="@body" dynamic="true" responsive="true"
+                      styleClass="admin-dialog admin-dialog-form" style="max-width: min(92vw, 760px); width: 100%;">
+                <h:panelGroup rendered="#{adminProductBean.selected != null}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Kod</label>
+                            <p:inputText value="#{adminProductBean.selected.code}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Barkod</label>
+                            <p:inputText value="#{adminProductBean.selected.barcode}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Birim</label>
+                            <p:selectOneMenu value="#{adminProductBean.selected.unit}" styleClass="w-100">
+                                <f:selectItems value="#{adminProductBean.unitOptions}" var="u" itemValue="#{u}" itemLabel="#{u}"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Ad</label>
+                            <p:inputText value="#{adminProductBean.selected.name}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Kategori</label>
+                            <p:selectOneMenu value="#{adminProductBean.selected.category}" styleClass="w-100" converter="productCategoryConverter">
+                                <f:selectItem itemLabel="Seçiniz" noSelectionOption="true"/>
+                                <f:selectItems value="#{adminProductBean.categories}" var="c" itemValue="#{c}" itemLabel="#{c.name}"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Alış fiyatı</label>
+                            <p:inputText value="#{adminProductBean.selected.purchasePrice}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Satış fiyatı</label>
+                            <p:inputText value="#{adminProductBean.selected.salesPrice}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Vergi oranı</label>
+                            <p:inputText value="#{adminProductBean.selected.taxRate}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Stok miktarı</label>
+                            <p:inputText value="#{adminProductBean.selected.stockQuantity}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Minimum stok</label>
+                            <p:inputText value="#{adminProductBean.selected.minStockQuantity}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <p:selectBooleanCheckbox value="#{adminProductBean.selected.active}" itemLabel="Aktif"/>
+                        </div>
+                    </div>
+                    <div class="admin-dialog-footer d-flex justify-content-end gap-2">
+                        <p:commandButton value="Kaydet" icon="pi pi-check" styleClass="admin-btn-primary"
+                                         action="#{adminProductBean.save}" update="mainForm" process="@form"/>
+                        <p:commandButton value="Kapat" icon="pi pi-times" type="button" styleClass="ui-button-secondary"
+                                         onclick="PF('productDlg').hide()"/>
+                    </div>
+                </h:panelGroup>
+            </p:dialog>
+        </h:form>
+    </ui:define>
+</ui:composition>

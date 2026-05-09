@@ -74,6 +74,16 @@
                             rendered="#{rbac.can('BANK_ACCOUNT','ACCESS')}">
                         Banka hesapları
                     </h:link>
+                    <h:link outcome="/admin/products"
+                            styleClass="#{view.viewId == '/admin/products.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                            rendered="#{rbac.can('PRODUCT','ACCESS')}">
+                        Ürünler
+                    </h:link>
+                    <h:link outcome="/admin/stock-movements"
+                            styleClass="#{view.viewId == '/admin/stock-movements.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                            rendered="#{rbac.can('STOCK_MOVEMENT','ACCESS')}">
+                        Stok hareketleri
+                    </h:link>
                 </div>
             </details>
         </nav>

@@ -7,5 +7,7 @@ public enum Scope {
     CURRENT_ACCOUNT,
     JOURNAL_ENTRY,
     CASH_ACCOUNT,
-    BANK_ACCOUNT
+    BANK_ACCOUNT,
+    PRODUCT,
+    STOCK_MOVEMENT
 }
