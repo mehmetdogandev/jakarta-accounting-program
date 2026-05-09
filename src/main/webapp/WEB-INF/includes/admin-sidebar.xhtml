@@ -56,7 +56,16 @@
                     </h:link>
                 </div>
             </details>
-            <details class="admin-sb-details">
+            <details class="admin-sb-details"
+                     open="#{view.viewId == '/admin/current-accounts.xhtml'
+                             or view.viewId == '/admin/journal-entries.xhtml'
+                             or view.viewId == '/admin/cash-accounts.xhtml'
+                             or view.viewId == '/admin/bank-accounts.xhtml'
+                             or view.viewId == '/admin/products.xhtml'
+                             or view.viewId == '/admin/stock-movements.xhtml'
+                             or view.viewId == '/admin/cheques.xhtml'
+                             or view.viewId == '/admin/expenses.xhtml'
+                             or view.viewId == '/admin/reports.xhtml'}">
                 <summary class="admin-sb-details-summary">Muhasebe işlemleri</summary>
                 <div class="admin-sb-details-body">
                     <h:link outcome="/admin/current-accounts"

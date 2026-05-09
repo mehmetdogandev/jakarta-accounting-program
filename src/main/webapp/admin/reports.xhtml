@@ -45,7 +45,7 @@
 
                         <ui:fragment rendered="#{adminReportBean.reportType eq 'TRIAL_BALANCE'}">
                             <p:dataTable id="trialTable" value="#{adminReportBean.rows}" var="r" styleClass="admin-table"
-                                         paginator="true" rows="15" emptyMessage="Veri yok">
+                                         paginator="true" paginatorPosition="bottom" rows="15" emptyMessage="Veri yok">
                                 <p:column headerText="Hesap kodu"><h:outputText value="#{r.accountCode}"/></p:column>
                                 <p:column headerText="Hesap adi"><h:outputText value="#{r.accountName}"/></p:column>
                                 <p:column headerText="Borc"><h:outputText value="#{adminReportBean.formatCurrency(r.totalDebit)}"/></p:column>
@@ -77,7 +77,7 @@
 
                         <ui:fragment rendered="#{adminReportBean.reportType eq 'RECEIVABLES' or adminReportBean.reportType eq 'PAYABLES'}">
                             <p:dataTable id="rpTable" value="#{adminReportBean.rows}" var="r" styleClass="admin-table"
-                                         paginator="true" rows="15" emptyMessage="Veri yok">
+                                         paginator="true" paginatorPosition="bottom" rows="15" emptyMessage="Veri yok">
                                 <p:column headerText="Cari kod"><h:outputText value="#{r.currentAccountCode}"/></p:column>
                                 <p:column headerText="Cari ad"><h:outputText value="#{r.currentAccountName}"/></p:column>
                                 <p:column headerText="Fatura no"><h:outputText value="#{r.invoiceNo}"/></p:column>
@@ -99,7 +99,7 @@
 
                         <ui:fragment rendered="#{adminReportBean.reportType eq 'STOCK'}">
                             <p:dataTable id="stockTable" value="#{adminReportBean.rows}" var="r" styleClass="admin-table"
-                                         paginator="true" rows="15" emptyMessage="Veri yok">
+                                         paginator="true" paginatorPosition="bottom" rows="15" emptyMessage="Veri yok">
                                 <p:column headerText="Urun kodu"><h:outputText value="#{r.productCode}"/></p:column>
                                 <p:column headerText="Urun"><h:outputText value="#{r.productName}"/></p:column>
                                 <p:column headerText="Stok"><h:outputText value="#{r.stockQuantity}"/></p:column>

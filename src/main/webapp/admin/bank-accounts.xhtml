@@ -78,7 +78,7 @@
                             </div>
 
                             <p:dataTable id="bankTxnTable" value="#{adminBankAccountBean.transactions}" var="txn"
-                                         styleClass="admin-table" paginator="true" rows="10" emptyMessage="Hareket yok.">
+                                         styleClass="admin-table" paginator="true" paginatorPosition="bottom" rows="10" emptyMessage="Hareket yok.">
                                 <p:column headerText="Tarih">
                                     <h:outputText value="#{txn.transactionDate}"/>
                                 </p:column>
