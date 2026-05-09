@@ -14,20 +14,63 @@
     <ui:define name="content">
         <div class="admin-page-card mb-3">
             <h1 class="admin-page-title">Yönetim paneli</h1>
-            <p class="admin-page-lead mb-0">Sol menüden modüllere erişin. Menü öğeleri ACCESS yetkisine göre görünür.</p>
+            <p class="admin-page-lead mb-0">Yetki bazlı hızlı işlemler ve detaylı özet metrikler.</p>
         </div>
 
-        <div class="admin-dashboard-grid">
-            <h:link outcome="/admin/users" styleClass="admin-dash-card" rendered="#{rbac.can('USER','ACCESS')}">
-                Kullanıcılar
-            </h:link>
-            <h:link outcome="/admin/roles" styleClass="admin-dash-card" rendered="#{rbac.can('ROLE','ACCESS')}">
-                Roller
-            </h:link>
-            <h:link outcome="/admin/role-groups" styleClass="admin-dash-card"
-                    rendered="#{rbac.can('ROLE_GROUP','ACCESS')}">
-                Rol grupları
-            </h:link>
+        <div class="admin-page-card mb-3">
+            <h2 class="h5 mb-3">Hızlı işlemler</h2>
+            <div class="admin-dashboard-grid">
+                <h:link outcome="/admin/users" styleClass="admin-dash-card" rendered="#{rbac.can('USER','ACCESS')}">Kullanıcılar</h:link>
+                <h:link outcome="/admin/roles" styleClass="admin-dash-card" rendered="#{rbac.can('ROLE','ACCESS')}">Roller</h:link>
+                <h:link outcome="/admin/role-groups" styleClass="admin-dash-card" rendered="#{rbac.can('ROLE_GROUP','ACCESS')}">Rol grupları</h:link>
+                <h:link outcome="/admin/current-accounts" styleClass="admin-dash-card" rendered="#{rbac.can('CURRENT_ACCOUNT','CREATE') or rbac.can('CURRENT_ACCOUNT','ACCESS')}">Cari hesaplar</h:link>
+                <h:link outcome="/admin/journal-entries" styleClass="admin-dash-card" rendered="#{rbac.can('JOURNAL_ENTRY','CREATE') or rbac.can('JOURNAL_ENTRY','ACCESS')}">Muhasebe fişleri</h:link>
+                <h:link outcome="/admin/cash-accounts" styleClass="admin-dash-card" rendered="#{rbac.can('CASH_ACCOUNT','CREATE') or rbac.can('CASH_ACCOUNT','ACCESS')}">Kasalar</h:link>
+                <h:link outcome="/admin/bank-accounts" styleClass="admin-dash-card" rendered="#{rbac.can('BANK_ACCOUNT','CREATE') or rbac.can('BANK_ACCOUNT','ACCESS')}">Banka hesapları</h:link>
+                <h:link outcome="/admin/products" styleClass="admin-dash-card" rendered="#{rbac.can('PRODUCT','CREATE') or rbac.can('PRODUCT','ACCESS')}">Ürünler</h:link>
+                <h:link outcome="/admin/stock-movements" styleClass="admin-dash-card" rendered="#{rbac.can('STOCK_MOVEMENT','CREATE') or rbac.can('STOCK_MOVEMENT','ACCESS')}">Stok hareketleri</h:link>
+                <h:link outcome="/admin/cheques" styleClass="admin-dash-card" rendered="#{rbac.can('CHEQUE','CREATE') or rbac.can('CHEQUE','ACCESS')}">Çek / Senet</h:link>
+                <h:link outcome="/admin/expenses" styleClass="admin-dash-card" rendered="#{rbac.can('EXPENSE','CREATE') or rbac.can('EXPENSE','ACCESS')}">Gelir / Gider</h:link>
+                <h:link outcome="/admin/reports" styleClass="admin-dash-card" rendered="#{rbac.can('REPORT','READ') or rbac.can('REPORT','ACCESS')}">Raporlar</h:link>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-3"><div class="admin-dash-card">Toplam kasa<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.formatCurrency(adminDashboardBean.totalCashBalance)}"/></div></div></div>
+            <div class="col-md-3"><div class="admin-dash-card">Toplam banka<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.formatCurrency(adminDashboardBean.totalBankBalance)}"/></div></div></div>
+            <div class="col-md-3"><div class="admin-dash-card">Cari hesap<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.totalCurrentAccounts}"/></div></div></div>
+            <div class="col-md-3"><div class="admin-dash-card">Bekleyen gelir/gider<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.pendingIncomeCount}"/> / <h:outputText value="#{adminDashboardBean.pendingExpenseCount}"/></div></div></div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-3"><div class="admin-dash-card">Toplam ürün<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.totalProducts}"/></div></div></div>
+            <div class="col-md-3"><div class="admin-dash-card">Düşük stok<div class="h5 mb-0 text-danger"><h:outputText value="#{adminDashboardBean.lowStockCount}"/></div></div></div>
+            <div class="col-md-3"><div class="admin-dash-card">Stok değeri<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.formatCurrency(adminDashboardBean.stockValuationTotal)}"/></div></div></div>
+            <div class="col-md-3"><div class="admin-dash-card">7 gün vade çek<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.dueSoonChequeCount}"/></div></div></div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6"><div class="admin-dash-card">Yatırılmış çek<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.depositedChequeCount}"/></div></div></div>
+            <div class="col-md-6"><div class="admin-dash-card">Verilmiş çek<div class="h5 mb-0"><h:outputText value="#{adminDashboardBean.issuedChequeCount}"/></div></div></div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="admin-page-card">
+                    <h2 class="h6 mb-3">Nakit akışı (30 gün)</h2>
+                    <div style="height: 280px;">
+                        <p:chart type="line" model="#{adminDashboardBean.cashFlowChart}" style="height:100%"/>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="admin-page-card">
+                    <h2 class="h6 mb-3">Gelir / Gider trendi (30 gün)</h2>
+                    <div style="height: 280px;">
+                        <p:chart type="line" model="#{adminDashboardBean.incomeExpenseChart}" style="height:100%"/>
+                    </div>
+                </div>
+            </div>
         </div>
     </ui:define>
 </ui:composition>
