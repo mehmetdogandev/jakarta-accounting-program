@@ -1,0 +1,146 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/admin.xhtml">
+
+    <ui:define name="title">Raporlar</ui:define>
+
+    <ui:define name="topbar">
+        <span class="admin-app-topbar-heading">Raporlar</span>
+    </ui:define>
+
+    <ui:define name="content">
+        <h:form id="mainForm">
+            <p:messages id="msgs" showDetail="true" closable="true"/>
+
+            <div class="admin-page-card">
+                <h1 class="admin-page-title">Finansal raporlama</h1>
+
+                <div class="row g-3">
+                    <div class="col-lg-3">
+                        <div class="admin-dash-card">
+                            <h6 class="mb-2">Rapor tipi</h6>
+                            <p:selectOneRadio value="#{adminReportBean.reportType}" layout="pageDirection">
+                                <f:selectItems value="#{adminReportBean.reportTypeOptions}" var="rt"
+                                               itemValue="#{rt}" itemLabel="#{adminReportBean.reportTypeLabel(rt)}"/>
+                            </p:selectOneRadio>
+                            <hr/>
+                            <h6 class="mb-2">Tarih araligi</h6>
+                            <p:datePicker value="#{adminReportBean.fromDate}" pattern="yyyy-MM-dd" styleClass="w-100 mb-2"/>
+                            <p:datePicker value="#{adminReportBean.toDate}" pattern="yyyy-MM-dd" styleClass="w-100 mb-2"/>
+                            <p:commandButton value="Raporla" icon="pi pi-play" styleClass="admin-btn-primary w-100"
+                                             actionListener="#{adminReportBean.generateReport}" update="mainForm:reportPanel mainForm:msgs"/>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-9" id="reportPanel">
+                        <div class="d-flex justify-content-end gap-2 mb-2">
+                            <p:commandButton value="PDF" icon="pi pi-file-pdf" process="@this"
+                                             actionListener="#{adminReportBean.exportToPdf}" update="mainForm:msgs"/>
+                            <p:commandButton value="Excel" icon="pi pi-file-excel" process="@this"
+                                             actionListener="#{adminReportBean.exportToExcel}" update="mainForm:msgs"/>
+                        </div>
+
+                        <ui:fragment rendered="#{adminReportBean.reportType eq 'TRIAL_BALANCE'}">
+                            <p:dataTable id="trialTable" value="#{adminReportBean.rows}" var="r" styleClass="admin-table"
+                                         paginator="true" rows="15" emptyMessage="Veri yok">
+                                <p:column headerText="Hesap kodu"><h:outputText value="#{r.accountCode}"/></p:column>
+                                <p:column headerText="Hesap adi"><h:outputText value="#{r.accountName}"/></p:column>
+                                <p:column headerText="Borc"><h:outputText value="#{adminReportBean.formatCurrency(r.totalDebit)}"/></p:column>
+                                <p:column headerText="Alacak"><h:outputText value="#{adminReportBean.formatCurrency(r.totalCredit)}"/></p:column>
+                                <p:column headerText="Bakiye"><h:outputText value="#{adminReportBean.formatCurrency(r.balance)}"/></p:column>
+                            </p:dataTable>
+                        </ui:fragment>
+
+                        <ui:fragment rendered="#{adminReportBean.reportType eq 'PROFIT_LOSS'}">
+                            <div class="row g-3">
+                                <div class="col-md-4"><div class="admin-dash-card">Satis Geliri<div class="h5 mb-0"><h:outputText value="#{adminReportBean.formatCurrency(adminReportBean.summaryMap.salesRevenue)}"/></div></div></div>
+                                <div class="col-md-4"><div class="admin-dash-card">Maliyet<div class="h5 mb-0"><h:outputText value="#{adminReportBean.formatCurrency(adminReportBean.summaryMap.costOfGoodsSold)}"/></div></div></div>
+                                <div class="col-md-4"><div class="admin-dash-card">Brut Kar<div class="h5 mb-0"><h:outputText value="#{adminReportBean.formatCurrency(adminReportBean.summaryMap.grossProfit)}"/></div></div></div>
+                                <div class="col-md-6"><div class="admin-dash-card">Diger Gelir<div class="h5 mb-0"><h:outputText value="#{adminReportBean.formatCurrency(adminReportBean.summaryMap.otherIncome)}"/></div></div></div>
+                                <div class="col-md-6"><div class="admin-dash-card">Giderler<div class="h5 mb-0"><h:outputText value="#{adminReportBean.formatCurrency(adminReportBean.summaryMap.expenses)}"/></div></div></div>
+                                <div class="col-md-12"><div class="admin-dash-card">Net Kar<div class="h4 mb-0"><h:outputText value="#{adminReportBean.formatCurrency(adminReportBean.summaryMap.netProfit)}"/></div></div></div>
+                            </div>
+                        </ui:fragment>
+
+                        <ui:fragment rendered="#{adminReportBean.reportType eq 'CASH_FLOW'}">
+                            <div class="row g-3">
+                                <div class="col-md-6"><div class="admin-dash-card">Kasa Giris<div class="h5 mb-0"><h:outputText value="#{adminReportBean.formatCurrency(adminReportBean.summaryMap.cashIn)}"/></div></div></div>
+                                <div class="col-md-6"><div class="admin-dash-card">Kasa Cikis<div class="h5 mb-0"><h:outputText value="#{adminReportBean.formatCurrency(adminReportBean.summaryMap.cashOut)}"/></div></div></div>
+                                <div class="col-md-6"><div class="admin-dash-card">Banka Giris<div class="h5 mb-0"><h:outputText value="#{adminReportBean.formatCurrency(adminReportBean.summaryMap.bankIn)}"/></div></div></div>
+                                <div class="col-md-6"><div class="admin-dash-card">Banka Cikis<div class="h5 mb-0"><h:outputText value="#{adminReportBean.formatCurrency(adminReportBean.summaryMap.bankOut)}"/></div></div></div>
+                                <div class="col-md-12"><div class="admin-dash-card">Net Nakit Akisi<div class="h4 mb-0"><h:outputText value="#{adminReportBean.formatCurrency(adminReportBean.summaryMap.netCashFlow)}"/></div></div></div>
+                            </div>
+                        </ui:fragment>
+
+                        <ui:fragment rendered="#{adminReportBean.reportType eq 'RECEIVABLES' or adminReportBean.reportType eq 'PAYABLES'}">
+                            <p:dataTable id="rpTable" value="#{adminReportBean.rows}" var="r" styleClass="admin-table"
+                                         paginator="true" rows="15" emptyMessage="Veri yok">
+                                <p:column headerText="Cari kod"><h:outputText value="#{r.currentAccountCode}"/></p:column>
+                                <p:column headerText="Cari ad"><h:outputText value="#{r.currentAccountName}"/></p:column>
+                                <p:column headerText="Fatura no"><h:outputText value="#{r.invoiceNo}"/></p:column>
+                                <p:column headerText="Vade">
+                                    <span class="#{adminReportBean.statusClass(r.overdue)}"><h:outputText value="#{r.dueDate}"/></span>
+                                </p:column>
+                                <p:column headerText="Acik tutar"><h:outputText value="#{adminReportBean.formatCurrency(r.openAmount)}"/></p:column>
+                            </p:dataTable>
+                        </ui:fragment>
+
+                        <ui:fragment rendered="#{adminReportBean.reportType eq 'AGED'}">
+                            <p:dataTable id="agedTable" value="#{adminReportBean.rows}" var="r" styleClass="admin-table" emptyMessage="Veri yok">
+                                <p:column headerText="0-30"><h:outputText value="#{adminReportBean.formatCurrency(r.bucket0to30)}"/></p:column>
+                                <p:column headerText="31-60"><h:outputText value="#{adminReportBean.formatCurrency(r.bucket31to60)}"/></p:column>
+                                <p:column headerText="61-90"><h:outputText value="#{adminReportBean.formatCurrency(r.bucket61to90)}"/></p:column>
+                                <p:column headerText="90+"><h:outputText value="#{adminReportBean.formatCurrency(r.bucket90plus)}"/></p:column>
+                            </p:dataTable>
+                        </ui:fragment>
+
+                        <ui:fragment rendered="#{adminReportBean.reportType eq 'STOCK'}">
+                            <p:dataTable id="stockTable" value="#{adminReportBean.rows}" var="r" styleClass="admin-table"
+                                         paginator="true" rows="15" emptyMessage="Veri yok">
+                                <p:column headerText="Urun kodu"><h:outputText value="#{r.productCode}"/></p:column>
+                                <p:column headerText="Urun"><h:outputText value="#{r.productName}"/></p:column>
+                                <p:column headerText="Stok"><h:outputText value="#{r.stockQuantity}"/></p:column>
+                                <p:column headerText="Ort. maliyet"><h:outputText value="#{adminReportBean.formatCurrency(r.avgCost)}"/></p:column>
+                                <p:column headerText="Stok degeri"><h:outputText value="#{adminReportBean.formatCurrency(r.stockValue)}"/></p:column>
+                            </p:dataTable>
+                        </ui:fragment>
+                    </div>
+                </div>
+            </div>
+
+            <p:commandButton id="tbPdfBtn" type="button" style="display:none">
+                <p:dataExporter type="pdf" target="trialTable" fileName="mizan"/>
+            </p:commandButton>
+            <p:commandButton id="tbXlsxBtn" type="button" style="display:none">
+                <p:dataExporter type="xlsx" target="trialTable" fileName="mizan"/>
+            </p:commandButton>
+            <p:commandButton id="recPdfBtn" type="button" style="display:none">
+                <p:dataExporter type="pdf" target="rpTable" fileName="alacaklar"/>
+            </p:commandButton>
+            <p:commandButton id="recXlsxBtn" type="button" style="display:none">
+                <p:dataExporter type="xlsx" target="rpTable" fileName="alacaklar"/>
+            </p:commandButton>
+            <p:commandButton id="payPdfBtn" type="button" style="display:none">
+                <p:dataExporter type="pdf" target="rpTable" fileName="borclar"/>
+            </p:commandButton>
+            <p:commandButton id="payXlsxBtn" type="button" style="display:none">
+                <p:dataExporter type="xlsx" target="rpTable" fileName="borclar"/>
+            </p:commandButton>
+            <p:commandButton id="agedPdfBtn" type="button" style="display:none">
+                <p:dataExporter type="pdf" target="agedTable" fileName="vade-analizi"/>
+            </p:commandButton>
+            <p:commandButton id="agedXlsxBtn" type="button" style="display:none">
+                <p:dataExporter type="xlsx" target="agedTable" fileName="vade-analizi"/>
+            </p:commandButton>
+            <p:commandButton id="stockPdfBtn" type="button" style="display:none">
+                <p:dataExporter type="pdf" target="stockTable" fileName="stok-degeri"/>
+            </p:commandButton>
+            <p:commandButton id="stockXlsxBtn" type="button" style="display:none">
+                <p:dataExporter type="xlsx" target="stockTable" fileName="stok-degeri"/>
+            </p:commandButton>
+        </h:form>
+    </ui:define>
+</ui:composition>

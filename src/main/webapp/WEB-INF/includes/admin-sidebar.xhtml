@@ -94,6 +94,11 @@
                             rendered="#{rbac.can('EXPENSE','ACCESS')}">
                         Gelir / Gider
                     </h:link>
+                    <h:link outcome="/admin/reports"
+                            styleClass="#{view.viewId == '/admin/reports.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                            rendered="#{rbac.can('REPORT','ACCESS')}">
+                        Raporlar
+                    </h:link>
                 </div>
             </details>
         </nav>

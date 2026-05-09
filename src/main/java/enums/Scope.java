@@ -12,5 +12,6 @@ public enum Scope {
     STOCK_MOVEMENT,
     CHEQUE,
     EXPENSE,
-    INCOME
+    INCOME,
+    REPORT
 }
