@@ -59,6 +59,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-accounting}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      # Dev stack: re-link seed admin to super_admin if assignment was soft-deleted or removed (pnpm dev)
+      SEED_ADMIN_ENSURE_SUPER_ADMIN: "true"
     networks:
       - app-network
 
