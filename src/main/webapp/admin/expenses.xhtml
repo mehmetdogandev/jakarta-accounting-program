@@ -1,0 +1,225 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/admin.xhtml">
+
+    <ui:define name="title">Gelir / Gider</ui:define>
+
+    <ui:define name="topbar">
+        <span class="admin-app-topbar-heading">Gelir / Gider</span>
+    </ui:define>
+
+    <ui:define name="content">
+        <h:form id="mainForm">
+            <p:messages id="msgs" showDetail="true" closable="true"/>
+
+            <div class="admin-page-card">
+                <h1 class="admin-page-title">Gelir ve gider kayıtları</h1>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="admin-dash-card">
+                            Dönem toplamı
+                            <div class="h4 mb-0">
+                                <h:outputText value="#{adminExpenseBean.formatCurrency(adminExpenseBean.totalAmount)}"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="admin-dash-card">
+                            Onay bekleyen
+                            <div class="h4 mb-0">
+                                <span class="badge text-bg-warning"><h:outputText value="#{adminExpenseBean.pendingCount}"/></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-toolbar">
+                    <div class="admin-toolbar-grow">
+                        <p:datePicker value="#{adminExpenseBean.filterFrom}" pattern="yyyy-MM-dd">
+                            <p:ajax listener="#{adminExpenseBean.refresh}" update="mainForm:tabs mainForm"/>
+                        </p:datePicker>
+                    </div>
+                    <div class="admin-toolbar-grow">
+                        <p:datePicker value="#{adminExpenseBean.filterTo}" pattern="yyyy-MM-dd">
+                            <p:ajax listener="#{adminExpenseBean.refresh}" update="mainForm:tabs mainForm"/>
+                        </p:datePicker>
+                    </div>
+                    <div class="admin-toolbar-grow">
+                        <p:selectOneMenu value="#{adminExpenseBean.filterStatus}" styleClass="w-100">
+                            <f:selectItem itemValue="" itemLabel="Durum: Tümü"/>
+                            <f:selectItems value="#{adminExpenseBean.statusOptions}" var="s" itemValue="#{s}" itemLabel="#{s}"/>
+                            <p:ajax listener="#{adminExpenseBean.refresh}" update="mainForm:tabs"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="admin-toolbar-actions">
+                        <p:commandButton value="Yeni kayıt" icon="pi pi-plus" styleClass="admin-btn-primary"
+                                         rendered="#{rbac.can('EXPENSE','CREATE')}"
+                                         actionListener="#{adminExpenseBean.openNew}"
+                                         update="mainForm"
+                                         oncomplete="PF('expenseDlg').show()"/>
+                    </div>
+                </div>
+
+                <p:tabView id="tabs" activeIndex="#{adminExpenseBean.tabIndex}">
+                    <p:ajax event="tabChange" listener="#{adminExpenseBean.onTabChange}" update="mainForm:tabs mainForm"/>
+
+                    <p:tab id="expenseTab" title="Giderler">
+                        <p:dataTable value="#{adminExpenseBean.records}" var="r"
+                                     paginator="true" rows="10" paginatorPosition="bottom"
+                                     emptyMessage="Kayıt yok" styleClass="admin-table">
+                            <p:column headerText="Tarih"><h:outputText value="#{r.transactionDate}"/></p:column>
+                            <p:column headerText="Kategori"><h:outputText value="#{r.category != null ? r.category.name : '—'}"/></p:column>
+                            <p:column headerText="Açıklama"><h:outputText value="#{r.description}"/></p:column>
+                            <p:column headerText="Tutar"><h:outputText value="#{adminExpenseBean.formatCurrency(r.amount)}"/></p:column>
+                            <p:column headerText="KDV"><h:outputText value="#{adminExpenseBean.formatCurrency(r.taxAmount)}"/></p:column>
+                            <p:column headerText="Ödeme"><h:outputText value="#{empty r.paymentMethod ? '—' : r.paymentMethod}"/></p:column>
+                            <p:column headerText="Cari"><h:outputText value="#{r.currentAccount != null ? r.currentAccount.name : '—'}"/></p:column>
+                            <p:column headerText="Durum">
+                                <span class="#{adminExpenseBean.statusBadgeClass(r.status)}"><h:outputText value="#{r.status}"/></span>
+                            </p:column>
+                            <p:column headerText="İşlemler" style="width:13rem">
+                                <p:commandButton value="Onayla" icon="pi pi-check"
+                                                 rendered="#{rbac.can('EXPENSE','UPDATE') and r.status eq 'PENDING'}"
+                                                 actionListener="#{adminExpenseBean.approve(r)}"
+                                                 update="mainForm"/>
+                                <p:commandButton value="Reddet" icon="pi pi-times"
+                                                 styleClass="ms-1 ui-button-secondary"
+                                                 rendered="#{rbac.can('EXPENSE','UPDATE') and r.status eq 'PENDING'}"
+                                                 actionListener="#{adminExpenseBean.reject(r)}"
+                                                 update="mainForm"/>
+                                <p:commandButton icon="pi pi-trash" styleClass="admin-btn-icon admin-btn-danger-icon ms-1"
+                                                 rendered="#{rbac.can('EXPENSE','DELETE') and r.status eq 'PENDING'}"
+                                                 actionListener="#{adminExpenseBean.softDelete(r)}"
+                                                 update="mainForm"/>
+                            </p:column>
+                        </p:dataTable>
+                    </p:tab>
+
+                    <p:tab id="incomeTab" title="Gelirler">
+                        <p:dataTable value="#{adminExpenseBean.records}" var="r"
+                                     paginator="true" rows="10" paginatorPosition="bottom"
+                                     emptyMessage="Kayıt yok" styleClass="admin-table">
+                            <p:column headerText="Tarih"><h:outputText value="#{r.transactionDate}"/></p:column>
+                            <p:column headerText="Kategori"><h:outputText value="#{r.category != null ? r.category.name : '—'}"/></p:column>
+                            <p:column headerText="Açıklama"><h:outputText value="#{r.description}"/></p:column>
+                            <p:column headerText="Tutar"><h:outputText value="#{adminExpenseBean.formatCurrency(r.amount)}"/></p:column>
+                            <p:column headerText="KDV"><h:outputText value="#{adminExpenseBean.formatCurrency(r.taxAmount)}"/></p:column>
+                            <p:column headerText="Ödeme"><h:outputText value="#{empty r.paymentMethod ? '—' : r.paymentMethod}"/></p:column>
+                            <p:column headerText="Cari"><h:outputText value="#{r.currentAccount != null ? r.currentAccount.name : '—'}"/></p:column>
+                            <p:column headerText="Durum">
+                                <span class="#{adminExpenseBean.statusBadgeClass(r.status)}"><h:outputText value="#{r.status}"/></span>
+                            </p:column>
+                            <p:column headerText="İşlemler" style="width:13rem">
+                                <p:commandButton value="Onayla" icon="pi pi-check"
+                                                 rendered="#{rbac.can('EXPENSE','UPDATE') and r.status eq 'PENDING'}"
+                                                 actionListener="#{adminExpenseBean.approve(r)}"
+                                                 update="mainForm"/>
+                                <p:commandButton value="Reddet" icon="pi pi-times"
+                                                 styleClass="ms-1 ui-button-secondary"
+                                                 rendered="#{rbac.can('EXPENSE','UPDATE') and r.status eq 'PENDING'}"
+                                                 actionListener="#{adminExpenseBean.reject(r)}"
+                                                 update="mainForm"/>
+                                <p:commandButton icon="pi pi-trash" styleClass="admin-btn-icon admin-btn-danger-icon ms-1"
+                                                 rendered="#{rbac.can('EXPENSE','DELETE') and r.status eq 'PENDING'}"
+                                                 actionListener="#{adminExpenseBean.softDelete(r)}"
+                                                 update="mainForm"/>
+                            </p:column>
+                        </p:dataTable>
+                    </p:tab>
+                </p:tabView>
+            </div>
+
+            <p:dialog id="expenseDlg" header="Yeni kayıt" widgetVar="expenseDlg"
+                      modal="true" appendTo="@body" dynamic="true" responsive="true"
+                      styleClass="admin-dialog admin-dialog-form" style="max-width: min(92vw, 780px); width: 100%;">
+                <h:panelGroup rendered="#{adminExpenseBean.selected != null}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Tür</label>
+                            <p:selectOneMenu value="#{adminExpenseBean.filterType}" styleClass="w-100">
+                                <f:selectItem itemValue="EXPENSE" itemLabel="Gider"/>
+                                <f:selectItem itemValue="INCOME" itemLabel="Gelir"/>
+                                <p:ajax listener="#{adminExpenseBean.refresh}" update="mainForm"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Kategori</label>
+                            <p:selectOneMenu value="#{adminExpenseBean.selectedCategoryId}" styleClass="w-100">
+                                <f:selectItem itemLabel="Seçiniz" noSelectionOption="true"/>
+                                <f:selectItems value="#{adminExpenseBean.categories}" var="c"
+                                               itemValue="#{c.id}" itemLabel="#{c.name}"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tarih</label>
+                            <p:datePicker value="#{adminExpenseBean.selected.transactionDate}" pattern="yyyy-MM-dd"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tutar</label>
+                            <p:inputText value="#{adminExpenseBean.selected.amount}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">KDV</label>
+                            <p:inputText value="#{adminExpenseBean.selected.taxAmount}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Ödeme yöntemi</label>
+                            <p:selectOneMenu value="#{adminExpenseBean.selected.paymentMethod}" styleClass="w-100">
+                                <f:selectItem itemLabel="Seçiniz" noSelectionOption="true"/>
+                                <f:selectItems value="#{adminExpenseBean.paymentMethodOptions}" var="pm" itemValue="#{pm}" itemLabel="#{pm}"/>
+                                <p:ajax update="mainForm:expenseDlg"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <h:panelGroup layout="block" rendered="#{adminExpenseBean.selected.paymentMethod eq 'CASH'}" styleClass="col-md-6">
+                            <label class="form-label">Kasa</label>
+                            <p:selectOneMenu value="#{adminExpenseBean.selectedCashAccountId}" styleClass="w-100">
+                                <f:selectItem itemLabel="Seçiniz" noSelectionOption="true"/>
+                                <f:selectItems value="#{adminExpenseBean.cashAccounts}" var="ca"
+                                               itemValue="#{ca.id}" itemLabel="#{ca.code} - #{ca.name}"/>
+                            </p:selectOneMenu>
+                        </h:panelGroup>
+                        <h:panelGroup layout="block"
+                                      rendered="#{adminExpenseBean.selected.paymentMethod eq 'BANK' or adminExpenseBean.selected.paymentMethod eq 'CHEQUE' or adminExpenseBean.selected.paymentMethod eq 'CREDIT_CARD'}"
+                                      styleClass="col-md-6">
+                            <label class="form-label">Banka</label>
+                            <p:selectOneMenu value="#{adminExpenseBean.selectedBankAccountId}" styleClass="w-100">
+                                <f:selectItem itemLabel="Seçiniz" noSelectionOption="true"/>
+                                <f:selectItems value="#{adminExpenseBean.bankAccounts}" var="ba"
+                                               itemValue="#{ba.id}" itemLabel="#{ba.code} - #{ba.bankName}"/>
+                            </p:selectOneMenu>
+                        </h:panelGroup>
+                        <div class="col-md-6">
+                            <label class="form-label">Cari</label>
+                            <p:autoComplete value="#{adminExpenseBean.selectedCurrentAccount}"
+                                            completeMethod="#{adminExpenseBean.completeCurrentAccount}"
+                                            var="acc"
+                                            itemLabel="#{acc.code} - #{acc.name}"
+                                            itemValue="#{acc}"
+                                            converter="currentAccountConverter"
+                                            forceSelection="true"
+                                            dropdown="true"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fiş/Makbuz no</label>
+                            <p:inputText value="#{adminExpenseBean.selected.receiptNumber}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Açıklama</label>
+                            <p:inputTextarea value="#{adminExpenseBean.selected.description}" rows="3" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                    </div>
+                    <div class="admin-dialog-footer d-flex justify-content-end gap-2">
+                        <p:commandButton value="Kaydet" icon="pi pi-check" styleClass="admin-btn-primary"
+                                         action="#{adminExpenseBean.save}" process="@form" update="mainForm"/>
+                        <p:commandButton value="Kapat" icon="pi pi-times" type="button" styleClass="ui-button-secondary"
+                                         onclick="PF('expenseDlg').hide()"/>
+                    </div>
+                </h:panelGroup>
+            </p:dialog>
+        </h:form>
+    </ui:define>
+</ui:composition>

@@ -10,5 +10,7 @@ public enum Scope {
     BANK_ACCOUNT,
     PRODUCT,
     STOCK_MOVEMENT,
-    CHEQUE
+    CHEQUE,
+    EXPENSE,
+    INCOME
 }

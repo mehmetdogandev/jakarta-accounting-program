@@ -89,6 +89,11 @@
                             rendered="#{rbac.can('CHEQUE','ACCESS')}">
                         Çek / Senet
                     </h:link>
+                    <h:link outcome="/admin/expenses"
+                            styleClass="#{view.viewId == '/admin/expenses.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                            rendered="#{rbac.can('EXPENSE','ACCESS')}">
+                        Gelir / Gider
+                    </h:link>
                 </div>
             </details>
         </nav>
