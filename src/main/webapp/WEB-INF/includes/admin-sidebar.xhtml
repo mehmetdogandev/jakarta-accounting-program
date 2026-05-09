@@ -27,26 +27,36 @@
         </header>
 
         <nav class="admin-sb-content flex-grow-1 overflow-y-auto">
-            <p class="admin-sb-group-label">Sistem yönetimi</p>
-            <h:link outcome="/admin/dashboard.xhtml"
-                    styleClass="#{view.viewId == '/admin/dashboard.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}">
-                Ana sayfa
-            </h:link>
-            <h:link outcome="/admin/users.xhtml"
-                    styleClass="#{view.viewId == '/admin/users.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
-                    rendered="#{rbac.can('USER','ACCESS')}">
-                Kullanıcılar
-            </h:link>
-            <h:link outcome="/admin/roles.xhtml"
-                    styleClass="#{view.viewId == '/admin/roles.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
-                    rendered="#{rbac.can('ROLE','ACCESS')}">
-                Roller
-            </h:link>
-            <h:link outcome="/admin/role-groups.xhtml"
-                    styleClass="#{view.viewId == '/admin/role-groups.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
-                    rendered="#{rbac.can('ROLE_GROUP','ACCESS')}">
-                Rol grupları
-            </h:link>
+            <details class="admin-sb-details" open="open">
+                <summary class="admin-sb-details-summary">Sistem yönetimi</summary>
+                <div class="admin-sb-details-body">
+                    <h:link outcome="/admin/dashboard.xhtml"
+                            styleClass="#{view.viewId == '/admin/dashboard.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}">
+                        Ana sayfa
+                    </h:link>
+                    <h:link outcome="/admin/users.xhtml"
+                            styleClass="#{view.viewId == '/admin/users.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                            rendered="#{rbac.can('USER','ACCESS')}">
+                        Kullanıcılar
+                    </h:link>
+                    <h:link outcome="/admin/roles.xhtml"
+                            styleClass="#{view.viewId == '/admin/roles.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                            rendered="#{rbac.can('ROLE','ACCESS')}">
+                        Roller
+                    </h:link>
+                    <h:link outcome="/admin/role-groups.xhtml"
+                            styleClass="#{view.viewId == '/admin/role-groups.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                            rendered="#{rbac.can('ROLE_GROUP','ACCESS')}">
+                        Rol grupları
+                    </h:link>
+                </div>
+            </details>
+            <details class="admin-sb-details">
+                <summary class="admin-sb-details-summary">Muhasebe işlemleri</summary>
+                <div class="admin-sb-details-body">
+                    <p class="admin-sb-placeholder">Bu gruptaki muhasebe sayfaları eklendikçe menü güncellenecek.</p>
+                </div>
+            </details>
         </nav>
 
         <footer class="admin-sb-footer border-top"
