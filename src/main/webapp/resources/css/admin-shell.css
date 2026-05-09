@@ -30,6 +30,13 @@
     align-items: stretch;
 }
 
+/* Tall pages: main scrolls; sidebar stays within viewport (sticky + internal nav scroll). */
+@media (min-width: 992px) {
+    .admin-root.admin-shell {
+        align-items: flex-start;
+    }
+}
+
 /* Sidebar canvas: mobile = offcanvas; lg+ = persistent column */
 .admin-offcanvas-sidebar.offcanvas-lg.offcanvas-start {
     background-color: var(--sidebar-background) !important;
@@ -38,7 +45,9 @@
 
 @media (min-width: 992px) {
     .admin-offcanvas-sidebar.offcanvas-lg {
-        position: relative !important;
+        position: sticky !important;
+        top: 0;
+        align-self: flex-start;
         transform: none !important;
         visibility: visible !important;
         flex: 0 0 var(--admin-sidebar-width);
@@ -47,7 +56,8 @@
         min-width: 0;
         height: 100vh;
         height: 100dvh;
-        top: auto;
+        max-height: 100vh;
+        max-height: 100dvh;
         left: auto;
         z-index: auto;
         transition:
@@ -59,9 +69,20 @@
     }
 
     .admin-offcanvas-sidebar.offcanvas-lg .admin-offcanvas-body {
-        height: 100vh;
-        height: 100dvh;
+        height: 100%;
+        max-height: 100%;
+        min-height: 0;
         overflow: hidden;
+    }
+
+    .admin-offcanvas-sidebar.offcanvas-lg .admin-sidebar-inner {
+        min-height: 0;
+        height: 100%;
+        max-height: 100%;
+    }
+
+    .admin-offcanvas-sidebar.offcanvas-lg .admin-sb-content {
+        min-height: 0;
     }
 
     .admin-shell--sidebar-collapsed .admin-offcanvas-sidebar.offcanvas-lg {
@@ -298,6 +319,13 @@
 /* Main column */
 .admin-main {
     min-width: 0;
+}
+
+@media (min-width: 992px) {
+    .admin-main {
+        min-height: 100vh;
+        min-height: 100dvh;
+    }
 }
 
 .admin-topbar {

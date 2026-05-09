@@ -56,7 +56,8 @@
                     <div class="col-lg-2">
                         <label class="form-label">Tür</label>
                         <p:selectOneMenu value="#{adminStockMovementBean.newMovement.movementType}" styleClass="w-100">
-                            <f:selectItems value="#{adminStockMovementBean.movementTypes}" var="t" itemValue="#{t}" itemLabel="#{t}"/>
+                            <f:selectItems value="#{adminStockMovementBean.movementTypes}" var="t"
+                                           itemValue="#{t}" itemLabel="#{adminStockMovementBean.movementTypeLabel(t)}"/>
                         </p:selectOneMenu>
                     </div>
                     <div class="col-lg-2">
@@ -89,7 +90,7 @@
                     </p:column>
                     <p:column headerText="Tür">
                         <span class="#{adminStockMovementBean.movementBadgeClass(m.movementType)}">
-                            <h:outputText value="#{m.movementType}"/>
+                            <h:outputText value="#{adminStockMovementBean.movementTypeLabel(m.movementType)}"/>
                         </span>
                     </p:column>
                     <p:column headerText="Miktar">

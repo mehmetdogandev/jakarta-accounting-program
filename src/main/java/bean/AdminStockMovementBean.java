@@ -15,6 +15,7 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import procedure.RbacProcedureBean;
 import service.AuditService;
+import util.StockMovementTypeLabels;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -123,6 +124,10 @@ public class AdminStockMovementBean implements Serializable {
 
     public List<String> getMovementTypes() {
         return List.of("IN", "OUT", "ADJUSTMENT", "RETURN_IN", "RETURN_OUT");
+    }
+
+    public String movementTypeLabel(String type) {
+        return StockMovementTypeLabels.tr(type);
     }
 
     public Product getSelectedProduct() {
