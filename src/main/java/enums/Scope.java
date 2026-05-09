@@ -5,5 +5,7 @@ public enum Scope {
     ROLE,
     ROLE_GROUP,
     CURRENT_ACCOUNT,
-    JOURNAL_ENTRY
+    JOURNAL_ENTRY,
+    CASH_ACCOUNT,
+    BANK_ACCOUNT
 }

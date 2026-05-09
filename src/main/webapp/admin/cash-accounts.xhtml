@@ -1,0 +1,190 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/admin.xhtml">
+
+    <ui:define name="title">Kasalar</ui:define>
+
+    <ui:define name="topbar">
+        <span class="admin-app-topbar-heading">Kasalar</span>
+    </ui:define>
+
+    <ui:define name="content">
+        <h:form id="mainForm">
+            <p:messages id="msgs" showDetail="true" closable="true"/>
+
+            <div class="admin-page-card">
+                <h1 class="admin-page-title">Kasa hesapları</h1>
+
+                <div class="row g-3">
+                    <div class="col-lg-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h3 class="h6 mb-0 text-muted text-uppercase small">Kasa listesi</h3>
+                            <p:commandButton value="Kasa ekle" icon="pi pi-plus"
+                                             styleClass="admin-btn-primary"
+                                             rendered="#{rbac.can('CASH_ACCOUNT','CREATE')}"
+                                             actionListener="#{adminCashAccountBean.openNewAccount}"
+                                             update="mainForm"
+                                             oncomplete="PF('cashAccountDlg').show()"/>
+                        </div>
+
+                        <p:dataList id="cashList" value="#{adminCashAccountBean.accounts}" var="acc" type="unordered"
+                                    emptyMessage="Kasa kaydı yok.">
+                            <p:commandLink styleClass="d-block text-decoration-none p-2 border rounded mb-2"
+                                           actionListener="#{adminCashAccountBean.selectAccount(acc)}"
+                                           update="mainForm:rightPanel">
+                                <div class="fw-semibold"><h:outputText value="#{acc.code} - #{acc.name}"/></div>
+                                <div class="small text-muted">
+                                    <h:outputText value="#{adminCashAccountBean.formatCurrency(acc.balance)}"/>
+                                </div>
+                            </p:commandLink>
+                        </p:dataList>
+                    </div>
+
+                    <div class="col-lg-8" id="rightPanel">
+                        <h:panelGroup rendered="#{adminCashAccountBean.selectedAccount != null}">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h3 class="h5 mb-1">
+                                        <h:outputText value="#{adminCashAccountBean.selectedAccount.code} - #{adminCashAccountBean.selectedAccount.name}"/>
+                                    </h3>
+                                    <div class="small text-muted">Para birimi: <h:outputText value="#{adminCashAccountBean.selectedAccount.currency}"/></div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="small text-muted">Bakiye</div>
+                                    <div class="h4 mb-0 text-success">
+                                        <h:outputText value="#{adminCashAccountBean.formatCurrency(adminCashAccountBean.selectedAccount.balance)}"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 mb-2">
+                                <p:commandButton value="Giriş" icon="pi pi-arrow-down"
+                                                 styleClass="admin-btn-primary"
+                                                 rendered="#{rbac.can('CASH_ACCOUNT','CREATE')}"
+                                                 actionListener="#{adminCashAccountBean.openNewTransaction('IN')}"
+                                                 update="mainForm"
+                                                 oncomplete="PF('cashTxnDlg').show()"/>
+                                <p:commandButton value="Çıkış" icon="pi pi-arrow-up"
+                                                 styleClass="ui-button-secondary"
+                                                 rendered="#{rbac.can('CASH_ACCOUNT','CREATE')}"
+                                                 actionListener="#{adminCashAccountBean.openNewTransaction('OUT')}"
+                                                 update="mainForm"
+                                                 oncomplete="PF('cashTxnDlg').show()"/>
+                            </div>
+
+                            <p:dataTable id="cashTxnTable" value="#{adminCashAccountBean.transactions}" var="txn"
+                                         styleClass="admin-table" paginator="true" rows="10" emptyMessage="Hareket yok.">
+                                <p:column headerText="Tarih">
+                                    <h:outputText value="#{txn.transactionDate}"/>
+                                </p:column>
+                                <p:column headerText="Tür">
+                                    <span class="#{adminCashAccountBean.transactionBadgeClass(txn.transactionType)}">
+                                        <h:outputText value="#{txn.transactionType}"/>
+                                    </span>
+                                </p:column>
+                                <p:column headerText="Tutar">
+                                    <h:outputText value="#{adminCashAccountBean.formatCurrency(txn.amount)}"/>
+                                </p:column>
+                                <p:column headerText="Açıklama">
+                                    <h:outputText value="#{txn.description}"/>
+                                </p:column>
+                                <p:column headerText="Cari">
+                                    <h:outputText value="#{txn.currentAccount != null ? txn.currentAccount.code : '—'}"/>
+                                </p:column>
+                            </p:dataTable>
+                        </h:panelGroup>
+
+                        <h:panelGroup rendered="#{adminCashAccountBean.selectedAccount == null}">
+                            <div class="text-muted small">Detayları görmek için soldan bir kasa seçin.</div>
+                        </h:panelGroup>
+                    </div>
+                </div>
+            </div>
+
+            <p:dialog id="cashAccountDlg" header="Kasa kartı" widgetVar="cashAccountDlg" modal="true"
+                      appendTo="@body" dynamic="true" responsive="true"
+                      styleClass="admin-dialog admin-dialog-form" style="max-width: min(92vw, 560px); width: 100%;">
+                <h:panelGroup rendered="#{adminCashAccountBean.selectedAccount != null}">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Kod</label>
+                            <p:inputText value="#{adminCashAccountBean.selectedAccount.code}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ad</label>
+                            <p:inputText value="#{adminCashAccountBean.selectedAccount.name}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Para birimi</label>
+                            <p:inputText value="#{adminCashAccountBean.selectedAccount.currency}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Bakiye</label>
+                            <p:inputText value="#{adminCashAccountBean.selectedAccount.balance}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <p:selectBooleanCheckbox value="#{adminCashAccountBean.selectedAccount.active}" itemLabel="Aktif"/>
+                        </div>
+                    </div>
+                    <div class="admin-dialog-footer d-flex justify-content-end gap-2">
+                        <p:commandButton value="Kaydet" icon="pi pi-check"
+                                         styleClass="admin-btn-primary"
+                                         action="#{adminCashAccountBean.saveAccount}"
+                                         update="mainForm" process="@form"/>
+                        <p:commandButton value="Kapat" icon="pi pi-times" type="button" styleClass="ui-button-secondary"
+                                         onclick="PF('cashAccountDlg').hide()"/>
+                    </div>
+                </h:panelGroup>
+            </p:dialog>
+
+            <p:dialog id="cashTxnDlg" header="Kasa hareketi" widgetVar="cashTxnDlg" modal="true"
+                      appendTo="@body" dynamic="true" responsive="true"
+                      styleClass="admin-dialog admin-dialog-form" style="max-width: min(92vw, 700px); width: 100%;">
+                <h:panelGroup rendered="#{adminCashAccountBean.newTransaction != null}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Tarih</label>
+                            <p:datePicker value="#{adminCashAccountBean.newTransaction.transactionDate}" pattern="yyyy-MM-dd"/>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tür</label>
+                            <p:selectOneMenu value="#{adminCashAccountBean.newTransaction.transactionType}" styleClass="w-100">
+                                <f:selectItem itemValue="IN" itemLabel="IN"/>
+                                <f:selectItem itemValue="OUT" itemLabel="OUT"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Tutar</label>
+                            <p:inputText value="#{adminCashAccountBean.newTransaction.amount}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Cari</label>
+                            <p:autoComplete value="#{adminCashAccountBean.transactionCurrentAccount}"
+                                            completeMethod="#{adminCashAccountBean.completeCurrentAccount}"
+                                            var="ca"
+                                            itemLabel="#{ca.code} - #{ca.name}"
+                                            itemValue="#{ca}"
+                                            converter="currentAccountConverter"
+                                            forceSelection="true"
+                                            dropdown="true"/>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Açıklama</label>
+                            <p:inputText value="#{adminCashAccountBean.newTransaction.description}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                    </div>
+                    <div class="admin-dialog-footer d-flex justify-content-end gap-2">
+                        <p:commandButton value="Kaydet" icon="pi pi-check" styleClass="admin-btn-primary"
+                                         action="#{adminCashAccountBean.saveTransaction}"
+                                         update="mainForm" process="@form"/>
+                        <p:commandButton value="Kapat" icon="pi pi-times" type="button" styleClass="ui-button-secondary"
+                                         onclick="PF('cashTxnDlg').hide()"/>
+                    </div>
+                </h:panelGroup>
+            </p:dialog>
+        </h:form>
+    </ui:define>
+</ui:composition>

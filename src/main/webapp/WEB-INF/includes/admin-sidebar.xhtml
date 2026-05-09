@@ -64,6 +64,16 @@
                             rendered="#{rbac.can('JOURNAL_ENTRY','ACCESS')}">
                         Muhasebe fişleri
                     </h:link>
+                    <h:link outcome="/admin/cash-accounts"
+                            styleClass="#{view.viewId == '/admin/cash-accounts.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                            rendered="#{rbac.can('CASH_ACCOUNT','ACCESS')}">
+                        Kasalar
+                    </h:link>
+                    <h:link outcome="/admin/bank-accounts"
+                            styleClass="#{view.viewId == '/admin/bank-accounts.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                            rendered="#{rbac.can('BANK_ACCOUNT','ACCESS')}">
+                        Banka hesapları
+                    </h:link>
                 </div>
             </details>
         </nav>
