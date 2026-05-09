@@ -3,23 +3,53 @@
                 xmlns:f="jakarta.faces.core"
                 xmlns:ui="jakarta.faces.facelets">
 
-    <div class="card shadow-sm mb-3">
-        <div class="card-body">
-            <h:link outcome="/admin/dashboard" styleClass="btn btn-link p-0 mb-2">Ana sayfa</h:link>
-            <div class="mt-2">
-                <a class="btn btn-outline-secondary w-100 text-start" data-bs-toggle="collapse" href="#sysMgmt"
-                   role="button" aria-expanded="true" aria-controls="sysMgmt">
-                    Sistem Yönetimi
-                </a>
-                <div class="collapse show mt-2 ps-2 border-start" id="sysMgmt">
-                    <h:link outcome="/admin/users" styleClass="d-block py-1"
-                            rendered="#{rbac.can('USER','ACCESS')}">Kullanıcılar</h:link>
-                    <h:link outcome="/admin/roles" styleClass="d-block py-1"
-                            rendered="#{rbac.can('ROLE','ACCESS')}">Roller</h:link>
-                    <h:link outcome="/admin/role-groups" styleClass="d-block py-1"
-                            rendered="#{rbac.can('ROLE_GROUP','ACCESS')}">Rol grupları</h:link>
+    <div class="admin-sidebar-inner d-flex flex-column min-vh-100">
+        <header class="admin-sb-header">
+            <h:link outcome="/admin/dashboard.xhtml" styleClass="admin-sb-brand">
+                <span class="admin-sb-badge">JM</span>
+                <div>
+                    <div class="admin-sb-title">Jakarta Muhasebe</div>
+                    <div class="admin-sb-sub">Yönetim paneli</div>
                 </div>
+            </h:link>
+        </header>
+
+        <nav class="admin-sb-content flex-grow-1 overflow-y-auto">
+            <p class="admin-sb-group-label">Sistem yönetimi</p>
+            <h:link outcome="/admin/dashboard.xhtml"
+                    styleClass="#{view.viewId == '/admin/dashboard.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}">
+                Ana sayfa
+            </h:link>
+            <h:link outcome="/admin/users.xhtml"
+                    styleClass="#{view.viewId == '/admin/users.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                    rendered="#{rbac.can('USER','ACCESS')}">
+                Kullanıcılar
+            </h:link>
+            <h:link outcome="/admin/roles.xhtml"
+                    styleClass="#{view.viewId == '/admin/roles.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                    rendered="#{rbac.can('ROLE','ACCESS')}">
+                Roller
+            </h:link>
+            <h:link outcome="/admin/role-groups.xhtml"
+                    styleClass="#{view.viewId == '/admin/role-groups.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                    rendered="#{rbac.can('ROLE_GROUP','ACCESS')}">
+                Rol grupları
+            </h:link>
+        </nav>
+
+        <footer class="admin-sb-footer border-top"
+                style="border-color: var(--sidebar-border) !important;">
+            <div class="admin-sb-user">
+                <strong>Oturum</strong>
+                <h:outputText value="#{empty sessionScope.user ? '—' : sessionScope.user.email}"/>
             </div>
-        </div>
+            <h:form id="adminLogoutForm">
+                <h:commandButton id="logoutBtn"
+                                 type="submit"
+                                 styleClass="admin-btn-logout"
+                                 value="Çıkış yap"
+                                 action="#{authBean.logout()}"/>
+            </h:form>
+        </footer>
     </div>
 </ui:composition>

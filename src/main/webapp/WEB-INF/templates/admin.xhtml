@@ -2,23 +2,53 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="jakarta.faces.html"
       xmlns:f="jakarta.faces.core"
-      xmlns:ui="jakarta.faces.facelets"
-      xmlns:p="http://primefaces.org/ui">
-<f:view>
+      xmlns:ui="jakarta.faces.facelets">
+<f:view locale="tr">
     <h:head>
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
         <title><ui:insert name="title">Admin</ui:insert></title>
+        <link rel="preconnect" href="https://fonts.googleapis.com"/>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
         <h:outputStylesheet library="css" name="bootstrap.min.css"/>
+        <h:outputStylesheet library="css" name="admin-shell.css"/>
         <h:outputScript library="js" name="bootstrap.bundle.min.js"/>
     </h:head>
-    <h:body styleClass="bg-light">
-        <div class="container-fluid py-3">
-            <div class="row">
-                <nav class="col-md-3 col-lg-2 mb-3">
+    <h:body styleClass="admin-body">
+        <div class="admin-root">
+            <div class="offcanvas offcanvas-start offcanvas-lg admin-offcanvas-sidebar"
+                 tabindex="-1"
+                 id="adminSidebar"
+                 aria-labelledby="adminSidebarLabel"
+                 data-bs-scroll="true"
+                 data-bs-backdrop="true">
+                <div class="offcanvas-header border-bottom d-lg-none"
+                     style="border-color: var(--sidebar-border) !important;">
+                    <h5 class="offcanvas-title admin-topbar-title" id="adminSidebarLabel">Menü</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Kapat"/>
+                </div>
+                <div class="offcanvas-body admin-offcanvas-body d-flex flex-column p-0">
                     <ui:include src="/WEB-INF/includes/admin-sidebar.xhtml"/>
-                </nav>
-                <main class="col-md-9 col-lg-10">
+                </div>
+            </div>
+
+            <div class="admin-main flex-grow-1 d-flex flex-column min-vh-100">
+                <header class="admin-topbar d-lg-none d-flex align-items-center gap-2 px-3 py-2 bg-white">
+                    <button type="button"
+                            class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center p-2"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#adminSidebar"
+                            aria-controls="adminSidebar"
+                            aria-label="Menüyü aç">
+                        <svg class="admin-icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             aria-hidden="true">
+                            <path d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                    <span class="admin-topbar-title">Jakarta Muhasebe</span>
+                </header>
+                <main class="admin-content flex-grow-1 p-3 p-lg-4">
                     <ui:insert name="content"/>
                 </main>
             </div>
