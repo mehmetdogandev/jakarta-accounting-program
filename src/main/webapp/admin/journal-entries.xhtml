@@ -1,0 +1,199 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/admin.xhtml">
+
+    <ui:define name="title">Muhasebe fişleri</ui:define>
+
+    <ui:define name="topbar">
+        <span class="admin-app-topbar-heading">Muhasebe fişleri</span>
+    </ui:define>
+
+    <ui:define name="content">
+        <h:form id="mainForm">
+            <p:messages id="msgs" showDetail="true" closable="true"/>
+
+            <div class="admin-page-card">
+                <h1 class="admin-page-title">Muhasebe fişleri</h1>
+                <p class="admin-page-lead">Fişleri durum bazlı yönetin, satır toplamlarının dengesini takip edin.</p>
+
+                <div class="admin-list-panel">
+                    <div class="admin-toolbar">
+                        <div class="admin-toolbar-actions">
+                            <p:commandButton value="Yeni fiş" icon="pi pi-plus" styleClass="admin-btn-primary"
+                                             actionListener="#{adminJournalEntryBean.openNew}"
+                                             rendered="#{rbac.can('JOURNAL_ENTRY','CREATE')}"
+                                             update="mainForm"
+                                             oncomplete="PF('journalEntryDlg').show()"/>
+                        </div>
+                    </div>
+
+                    <p:dataTable id="entriesTable"
+                                 value="#{adminJournalEntryBean.entries}"
+                                 var="entry"
+                                 paginator="true"
+                                 paginatorPosition="bottom"
+                                 rows="10"
+                                 emptyMessage="Kayıt yok"
+                                 styleClass="admin-table">
+                        <p:column headerText="Fiş no">
+                            <h:outputText value="#{entry.entryNumber}"/>
+                        </p:column>
+                        <p:column headerText="Tarih">
+                            <h:outputText value="#{entry.entryDate}"/>
+                        </p:column>
+                        <p:column headerText="Açıklama">
+                            <h:outputText value="#{entry.description}"/>
+                        </p:column>
+                        <p:column headerText="Durum">
+                            <span class="#{adminJournalEntryBean.statusClass(entry.status)}">
+                                <h:outputText value="#{entry.status}"/>
+                            </span>
+                        </p:column>
+                        <p:column headerText="Toplam borç">
+                            <h:outputText value="#{adminJournalEntryBean.formatCurrency(entry.totalDebit)}"/>
+                        </p:column>
+                        <p:column headerText="Toplam alacak">
+                            <h:outputText value="#{adminJournalEntryBean.formatCurrency(entry.totalCredit)}"/>
+                        </p:column>
+                        <p:column headerText="İşlemler" style="width:14rem">
+                            <p:commandButton icon="pi pi-pencil" title="Düzenle"
+                                             styleClass="admin-btn-icon"
+                                             rendered="#{rbac.can('JOURNAL_ENTRY','UPDATE') and entry.status eq 'DRAFT'}"
+                                             actionListener="#{adminJournalEntryBean.openEdit(entry)}"
+                                             update="mainForm"
+                                             oncomplete="PF('journalEntryDlg').show()"/>
+                            <p:commandButton icon="pi pi-check" title="Post"
+                                             styleClass="admin-btn-icon ms-1"
+                                             rendered="#{rbac.can('JOURNAL_ENTRY','UPDATE') and entry.status eq 'DRAFT'}"
+                                             actionListener="#{adminJournalEntryBean.post(entry)}"
+                                             update="mainForm"/>
+                            <p:commandButton icon="pi pi-ban" title="İptal"
+                                             styleClass="admin-btn-icon ms-1"
+                                             rendered="#{rbac.can('JOURNAL_ENTRY','UPDATE') and entry.status ne 'CANCELLED'}"
+                                             actionListener="#{adminJournalEntryBean.cancel(entry)}"
+                                             update="mainForm"/>
+                            <p:commandButton icon="pi pi-trash" title="Sil"
+                                             styleClass="admin-btn-icon admin-btn-danger-icon ms-1"
+                                             rendered="#{rbac.can('JOURNAL_ENTRY','DELETE') and entry.status eq 'DRAFT'}"
+                                             actionListener="#{adminJournalEntryBean.softDelete(entry)}"
+                                             update="mainForm">
+                                <p:confirm header="Onay" message="Taslak fiş soft-delete ile kaldırılsın mı?" icon="pi pi-exclamation-triangle"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                </div>
+            </div>
+
+            <p:confirmDialog global="true" showEffect="fade" hideEffect="fade"/>
+
+            <p:dialog id="journalEntryDlg" header="Muhasebe fişi" widgetVar="journalEntryDlg"
+                      modal="true" appendTo="@body" dynamic="true" responsive="true"
+                      styleClass="admin-dialog admin-dialog-form"
+                      style="max-width: min(96vw, 1100px); width: 100%;">
+                <h:panelGroup rendered="#{adminJournalEntryBean.selected != null}">
+                    <div class="row g-3">
+                        <div class="col-lg-3">
+                            <label class="form-label" for="mainForm:entryNumberInp">Fiş no</label>
+                            <p:inputText id="entryNumberInp" value="#{adminJournalEntryBean.selected.entryNumber}"
+                                         readonly="#{adminJournalEntryBean.selectedPosted}"
+                                         styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="col-lg-3">
+                            <label class="form-label" for="mainForm:entryDateInp">Tarih</label>
+                            <p:datePicker id="entryDateInp" value="#{adminJournalEntryBean.selected.entryDate}"
+                                          pattern="yyyy-MM-dd"
+                                          disabled="#{adminJournalEntryBean.selectedPosted}"
+                                          styleClass="w-100"/>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label" for="mainForm:entryDescInp">Açıklama</label>
+                            <p:inputText id="entryDescInp" value="#{adminJournalEntryBean.selected.description}"
+                                         readonly="#{adminJournalEntryBean.selectedPosted}"
+                                         styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <p:dataTable id="lineTable" value="#{adminJournalEntryBean.editLines}" var="line"
+                                     rowIndexVar="idx" styleClass="admin-table" paginator="false">
+                            <p:column headerText="#" style="width:4rem">
+                                <h:outputText value="#{idx + 1}"/>
+                            </p:column>
+                            <p:column headerText="Hesap kodu">
+                                <p:inputText value="#{line.accountCode}" readonly="#{adminJournalEntryBean.selectedPosted}"
+                                             styleClass="form-control w-100 admin-dialog-input"/>
+                            </p:column>
+                            <p:column headerText="Hesap adı">
+                                <p:inputText value="#{line.accountName}" readonly="#{adminJournalEntryBean.selectedPosted}"
+                                             styleClass="form-control w-100 admin-dialog-input"/>
+                            </p:column>
+                            <p:column headerText="Cari">
+                                <p:autoComplete value="#{line.currentAccount}"
+                                                completeMethod="#{adminJournalEntryBean.completeCurrentAccount}"
+                                                var="ca"
+                                                itemLabel="#{ca.code} - #{ca.name}"
+                                                itemValue="#{ca}"
+                                                converter="currentAccountConverter"
+                                                forceSelection="true"
+                                                dropdown="true"
+                                                disabled="#{adminJournalEntryBean.selectedPosted}"
+                                                scrollHeight="220"/>
+                            </p:column>
+                            <p:column headerText="Borç">
+                                <p:inputText value="#{line.debit}" readonly="#{adminJournalEntryBean.selectedPosted}"
+                                             styleClass="form-control w-100 admin-dialog-input"/>
+                            </p:column>
+                            <p:column headerText="Alacak">
+                                <p:inputText value="#{line.credit}" readonly="#{adminJournalEntryBean.selectedPosted}"
+                                             styleClass="form-control w-100 admin-dialog-input"/>
+                            </p:column>
+                            <p:column headerText="Açıklama">
+                                <p:inputText value="#{line.description}" readonly="#{adminJournalEntryBean.selectedPosted}"
+                                             styleClass="form-control w-100 admin-dialog-input"/>
+                            </p:column>
+                            <p:column headerText="Sil" style="width:5rem">
+                                <p:commandButton icon="pi pi-times"
+                                                 styleClass="admin-btn-icon"
+                                                 rendered="#{not adminJournalEntryBean.selectedPosted}"
+                                                 actionListener="#{adminJournalEntryBean.removeLine(idx)}"
+                                                 process="@this"
+                                                 update="mainForm:lineTable mainForm:lineTotals"/>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+
+                    <div id="lineTotals" class="admin-dialog-footer d-flex flex-wrap justify-content-between align-items-center mt-3">
+                        <div class="small text-muted">
+                            Toplam Borç: <strong>#{adminJournalEntryBean.formatCurrency(adminJournalEntryBean.totalDebit)}</strong>
+                            |
+                            Toplam Alacak: <strong>#{adminJournalEntryBean.formatCurrency(adminJournalEntryBean.totalCredit)}</strong>
+                            |
+                            <span class="#{adminJournalEntryBean.balanced ? 'text-success' : 'text-danger'}">
+                                #{adminJournalEntryBean.balanced ? 'Dengede' : 'Dengesiz'}
+                            </span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <p:commandButton value="Satır ekle" icon="pi pi-plus"
+                                             rendered="#{not adminJournalEntryBean.selectedPosted}"
+                                             actionListener="#{adminJournalEntryBean.addLine}"
+                                             process="@this"
+                                             update="mainForm:lineTable mainForm:lineTotals"
+                                             styleClass="ui-button-secondary"/>
+                            <p:commandButton value="Kaydet" icon="pi pi-check"
+                                             rendered="#{not adminJournalEntryBean.selectedPosted}"
+                                             action="#{adminJournalEntryBean.save}"
+                                             update="mainForm"
+                                             process="@form"
+                                             styleClass="admin-btn-primary"/>
+                            <p:commandButton value="Kapat" icon="pi pi-times" type="button" styleClass="ui-button-secondary"
+                                             onclick="PF('journalEntryDlg').hide()"/>
+                        </div>
+                    </div>
+                </h:panelGroup>
+            </p:dialog>
+        </h:form>
+    </ui:define>
+</ui:composition>

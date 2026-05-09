@@ -59,6 +59,11 @@
                             rendered="#{rbac.can('CURRENT_ACCOUNT','ACCESS')}">
                         Cari hesaplar
                     </h:link>
+                    <h:link outcome="/admin/journal-entries"
+                            styleClass="#{view.viewId == '/admin/journal-entries.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                            rendered="#{rbac.can('JOURNAL_ENTRY','ACCESS')}">
+                        Muhasebe fişleri
+                    </h:link>
                 </div>
             </details>
         </nav>

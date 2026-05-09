@@ -4,5 +4,6 @@ public enum Scope {
     USER,
     ROLE,
     ROLE_GROUP,
-    CURRENT_ACCOUNT
+    CURRENT_ACCOUNT,
+    JOURNAL_ENTRY
 }
