@@ -15,6 +15,7 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import org.primefaces.PrimeFaces;
 import procedure.RbacProcedureBean;
+import service.AuditService;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -40,6 +41,9 @@ public class AdminJournalEntryBean implements Serializable {
 
     @EJB
     private RbacProcedureBean rbacProcedure;
+
+    @EJB
+    private AuditService auditService;
 
     private List<JournalEntry> entries = Collections.emptyList();
     private JournalEntry selected;
@@ -178,6 +182,7 @@ public class AdminJournalEntryBean implements Serializable {
         }
         selected.setLines(persistedLines);
         journalEntryFacade.save(selected);
+        auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), isNew ? "CREATE" : "UPDATE", selected);
         refresh();
         PrimeFaces.current().executeScript("PF('journalEntryDlg').hide()");
     }
@@ -188,6 +193,7 @@ public class AdminJournalEntryBean implements Serializable {
         }
         try {
             journalEntryFacade.post(row.getId());
+            auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), "APPROVE", row);
             refresh();
         } catch (IllegalStateException ex) {
             FacesContext.getCurrentInstance().addMessage(null,
@@ -201,6 +207,7 @@ public class AdminJournalEntryBean implements Serializable {
         }
         try {
             journalEntryFacade.cancel(row.getId());
+            auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), "CANCEL", row);
             refresh();
         } catch (IllegalStateException ex) {
             FacesContext.getCurrentInstance().addMessage(null,
@@ -214,6 +221,7 @@ public class AdminJournalEntryBean implements Serializable {
         }
         try {
             journalEntryFacade.softDelete(row.getId());
+            auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), "DELETE", row);
             refresh();
         } catch (IllegalStateException ex) {
             FacesContext.getCurrentInstance().addMessage(null,
@@ -294,5 +302,10 @@ public class AdminJournalEntryBean implements Serializable {
         for (int i = 0; i < editLines.size(); i++) {
             editLines.get(i).setLineOrder(i + 1);
         }
+    }
+
+    private String currentUsername() {
+        Object u = FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("user");
+        return u instanceof entity.AppUser au ? au.getEmail() : null;
     }
 }

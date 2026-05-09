@@ -16,6 +16,7 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import org.primefaces.PrimeFaces;
 import procedure.RbacProcedureBean;
+import service.AuditService;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -42,6 +43,9 @@ public class AdminChequeBean implements Serializable {
 
     @EJB
     private RbacProcedureBean rbacProcedure;
+
+    @EJB
+    private AuditService auditService;
 
     private List<Cheque> cheques = Collections.emptyList();
     private Cheque selected;
@@ -100,8 +104,10 @@ public class AdminChequeBean implements Serializable {
         }
         selected.setCurrentAccount(selectedCurrentAccount);
         selected.setBankAccount(selectedBankAccount);
-        selected.setCreatedBy(rbacProcedure.currentUserId().orElse(null));
+        String actorId = rbacProcedure.currentUserId().orElse(null);
+        selected.setCreatedBy(actorId);
         chequeFacade.save(selected);
+        auditService.logAction(actorId, currentUsername(), "CREATE", selected);
         refresh();
         PrimeFaces.current().executeScript("PF('chequeDlg').hide()");
     }
@@ -115,35 +121,35 @@ public class AdminChequeBean implements Serializable {
                     new FacesMessage(FacesMessage.SEVERITY_WARN, "Banka", "Önce bankaya yatırma için banka hesabı seçin."));
             return;
         }
-        exec(() -> chequeFacade.deposit(row.getId(), selectedBankAccount.getId()));
+        exec("DEPOSIT", row, () -> chequeFacade.deposit(row.getId(), selectedBankAccount.getId()));
     }
 
     public void collect(Cheque row) {
         if (!rbacProcedure.require(Scope.CHEQUE, Permission.UPDATE) || row == null || row.getId() == null) {
             return;
         }
-        exec(() -> chequeFacade.collect(row.getId()));
+        exec("COLLECT", row, () -> chequeFacade.collect(row.getId()));
     }
 
     public void returnCheque(Cheque row) {
         if (!rbacProcedure.require(Scope.CHEQUE, Permission.UPDATE) || row == null || row.getId() == null) {
             return;
         }
-        exec(() -> chequeFacade.returnCheque(row.getId()));
+        exec("RETURNED", row, () -> chequeFacade.returnCheque(row.getId()));
     }
 
     public void protest(Cheque row) {
         if (!rbacProcedure.require(Scope.CHEQUE, Permission.UPDATE) || row == null || row.getId() == null) {
             return;
         }
-        exec(() -> chequeFacade.protest(row.getId()));
+        exec("PROTESTED", row, () -> chequeFacade.protest(row.getId()));
     }
 
     public void pay(Cheque row) {
         if (!rbacProcedure.require(Scope.CHEQUE, Permission.UPDATE) || row == null || row.getId() == null) {
             return;
         }
-        exec(() -> chequeFacade.pay(row.getId()));
+        exec("PAID", row, () -> chequeFacade.pay(row.getId()));
     }
 
     public int getDueSoonCount() {
@@ -268,13 +274,19 @@ public class AdminChequeBean implements Serializable {
         this.selectedBankAccount = selectedBankAccount;
     }
 
-    private void exec(Runnable action) {
+    private void exec(String actionName, Cheque row, Runnable action) {
         try {
             action.run();
+            auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), actionName, row);
             refresh();
         } catch (IllegalStateException ex) {
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR, "Çek işlemi", ex.getMessage()));
         }
+    }
+
+    private String currentUsername() {
+        Object u = FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("user");
+        return u instanceof entity.AppUser au ? au.getEmail() : null;
     }
 }

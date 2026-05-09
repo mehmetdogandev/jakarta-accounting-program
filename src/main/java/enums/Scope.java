@@ -13,5 +13,6 @@ public enum Scope {
     CHEQUE,
     EXPENSE,
     INCOME,
-    REPORT
+    REPORT,
+    AUDIT_LOG
 }

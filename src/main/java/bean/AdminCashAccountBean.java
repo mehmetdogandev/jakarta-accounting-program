@@ -15,6 +15,7 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import org.primefaces.PrimeFaces;
 import procedure.RbacProcedureBean;
+import service.AuditService;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -38,6 +39,9 @@ public class AdminCashAccountBean implements Serializable {
 
     @EJB
     private RbacProcedureBean rbacProcedure;
+
+    @EJB
+    private AuditService auditService;
 
     private List<CashAccount> accounts = Collections.emptyList();
     private List<CashTransaction> transactions = Collections.emptyList();
@@ -98,6 +102,7 @@ public class AdminCashAccountBean implements Serializable {
             return;
         }
         cashAccountFacade.save(selectedAccount);
+        auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), isNew ? "CREATE" : "UPDATE", selectedAccount);
         refresh();
         PrimeFaces.current().executeScript("PF('cashAccountDlg').hide()");
     }
@@ -136,6 +141,7 @@ public class AdminCashAccountBean implements Serializable {
                 newTransaction.getReferenceId(),
                 rbacProcedure.currentUserId().orElse(null)
         );
+        auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), "CREATE", newTransaction);
         selectAccount(selectedAccount);
         PrimeFaces.current().executeScript("PF('cashTxnDlg').hide()");
     }
@@ -183,5 +189,10 @@ public class AdminCashAccountBean implements Serializable {
 
     public void setTransactionCurrentAccount(CurrentAccount transactionCurrentAccount) {
         this.transactionCurrentAccount = transactionCurrentAccount;
+    }
+
+    private String currentUsername() {
+        Object u = FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("user");
+        return u instanceof entity.AppUser au ? au.getEmail() : null;
     }
 }

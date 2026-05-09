@@ -8,10 +8,12 @@ import facadeLocal.RoleFacadeLocal;
 import facadeLocal.RoleGroupFacadeLocal;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
+import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import org.primefaces.PrimeFaces;
 import procedure.RbacProcedureBean;
+import service.AuditService;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -34,6 +36,9 @@ public class AdminRoleGroupsBean implements Serializable {
 
     @EJB
     private RbacProcedureBean rbacProcedure;
+
+    @EJB
+    private AuditService auditService;
 
     private List<RoleGroup> groups = Collections.emptyList();
     private Map<UUID, List<String>> linkedRoleNamesByGroupId = Collections.emptyMap();
@@ -124,6 +129,7 @@ public class AdminRoleGroupsBean implements Serializable {
         }
         List<UUID> roleIds = selectedRoles.stream().map(Role::getId).toList();
         roleGroupFacade.save(editGroup, roleIds, actor);
+        auditService.logAction(actor, currentUsername(), isNew ? "CREATE" : "UPDATE", editGroup);
         refresh();
         PrimeFaces.current().executeScript("PF('rgDlg').hide()");
     }
@@ -133,6 +139,7 @@ public class AdminRoleGroupsBean implements Serializable {
             return;
         }
         roleGroupFacade.softDelete(row.getId(), rbacProcedure.currentUserId().orElse(null));
+        auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), "DELETE", row);
         refresh();
     }
 
@@ -225,5 +232,10 @@ public class AdminRoleGroupsBean implements Serializable {
 
     public void setSelectedRoles(List<Role> selectedRoles) {
         this.selectedRoles = selectedRoles;
+    }
+
+    private String currentUsername() {
+        Object u = FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("user");
+        return u instanceof entity.AppUser au ? au.getEmail() : null;
     }
 }

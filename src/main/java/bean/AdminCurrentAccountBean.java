@@ -12,6 +12,7 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import org.primefaces.PrimeFaces;
 import procedure.RbacProcedureBean;
+import service.AuditService;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -31,6 +32,9 @@ public class AdminCurrentAccountBean implements Serializable {
 
     @EJB
     private RbacProcedureBean rbacProcedure;
+
+    @EJB
+    private AuditService auditService;
 
     private List<CurrentAccount> accounts = Collections.emptyList();
     private CurrentAccount selected;
@@ -99,6 +103,7 @@ public class AdminCurrentAccountBean implements Serializable {
         selected.setCode(selected.getCode().trim().toUpperCase(Locale.ROOT));
         selected.setType(selected.getType() == null ? "CUSTOMER" : selected.getType().trim().toUpperCase(Locale.ROOT));
         currentAccountFacade.save(selected);
+        auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), isNew ? "CREATE" : "UPDATE", selected);
         refresh();
         PrimeFaces.current().executeScript("PF('currentAccountDlg').hide()");
     }
@@ -108,6 +113,7 @@ public class AdminCurrentAccountBean implements Serializable {
             return;
         }
         currentAccountFacade.softDelete(row.getId());
+        auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), "DELETE", row);
         refresh();
     }
 
@@ -157,5 +163,10 @@ public class AdminCurrentAccountBean implements Serializable {
             }
         }
         return String.format("CA-%04d", max + 1);
+    }
+
+    private String currentUsername() {
+        Object u = FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("user");
+        return u instanceof entity.AppUser au ? au.getEmail() : null;
     }
 }

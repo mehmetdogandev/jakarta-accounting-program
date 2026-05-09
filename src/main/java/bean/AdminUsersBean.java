@@ -15,6 +15,7 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import org.primefaces.PrimeFaces;
 import procedure.RbacProcedureBean;
+import service.AuditService;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -35,6 +36,9 @@ public class AdminUsersBean implements Serializable {
 
     @EJB
     private RbacProcedureBean rbacProcedure;
+
+    @EJB
+    private AuditService auditService;
 
     private List<AppUser> users = Collections.emptyList();
     private AppUser editUser;
@@ -186,6 +190,7 @@ public class AdminUsersBean implements Serializable {
         }
         String actor = rbacProcedure.currentUserId().orElse(null);
         assignmentFacade.assignRole(editUser.getId(), role.getId(), actor);
+        auditService.logAction(actor, currentUsername(), "UPDATE", editUser);
         loadAssignments();
     }
 
@@ -198,6 +203,7 @@ public class AdminUsersBean implements Serializable {
         }
         String actor = rbacProcedure.currentUserId().orElse(null);
         assignmentFacade.removeRoleAssignment(editUser.getId(), role.getId(), actor);
+        auditService.logAction(actor, currentUsername(), "UPDATE", editUser);
         loadAssignments();
     }
 
@@ -210,6 +216,7 @@ public class AdminUsersBean implements Serializable {
         }
         String actor = rbacProcedure.currentUserId().orElse(null);
         assignmentFacade.assignRoleGroup(editUser.getId(), group.getId(), actor);
+        auditService.logAction(actor, currentUsername(), "UPDATE", editUser);
         loadAssignments();
     }
 
@@ -222,6 +229,7 @@ public class AdminUsersBean implements Serializable {
         }
         String actor = rbacProcedure.currentUserId().orElse(null);
         assignmentFacade.removeRoleGroupAssignment(editUser.getId(), group.getId(), actor);
+        auditService.logAction(actor, currentUsername(), "UPDATE", editUser);
         loadAssignments();
     }
 
@@ -276,6 +284,7 @@ public class AdminUsersBean implements Serializable {
             editUser.setCreatedBy(actor);
             editUser.setLastUpdatedBy(actor);
             userFacade.createUser(editUser);
+            auditService.logAction(actor, currentUsername(), "CREATE", editUser);
         } else {
             if (!rbacProcedure.require(Scope.USER, Permission.UPDATE)) {
                 return;
@@ -287,6 +296,7 @@ public class AdminUsersBean implements Serializable {
             }
             editUser.setLastUpdatedBy(actor);
             userFacade.editUser(editUser);
+            auditService.logAction(actor, currentUsername(), "UPDATE", editUser);
         }
         refresh();
         PrimeFaces.current().executeScript("PF('userMgmtDlg').hide()");
@@ -303,6 +313,7 @@ public class AdminUsersBean implements Serializable {
             return;
         }
         userFacade.softDeleteUser(row.getId(), actor.orElse(null));
+        auditService.logAction(actor.orElse(null), currentUsername(), "DELETE", row);
         refresh();
     }
 
@@ -432,5 +443,10 @@ public class AdminUsersBean implements Serializable {
 
     public boolean isEditMode() {
         return managementMode == UserManagementMode.EDIT;
+    }
+
+    private String currentUsername() {
+        Object u = FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("user");
+        return u instanceof AppUser au ? au.getEmail() : null;
     }
 }

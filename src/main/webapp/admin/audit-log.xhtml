@@ -1,0 +1,88 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:p="http://primefaces.org/ui"
+                template="/WEB-INF/templates/admin.xhtml">
+
+    <ui:define name="title">Denetim Logu</ui:define>
+
+    <ui:define name="topbar">
+        <span class="admin-app-topbar-heading">Denetim Logu</span>
+    </ui:define>
+
+    <ui:define name="content">
+        <h:form id="mainForm">
+            <div class="admin-page-card">
+                <h1 class="admin-page-title">Islem gecmisi</h1>
+
+                <div class="admin-toolbar">
+                    <div class="admin-toolbar-grow">
+                        <p:selectOneMenu value="#{adminAuditLogBean.filterUserId}" styleClass="w-100">
+                            <f:selectItem itemLabel="Kullanici: Tumu" itemValue=""/>
+                            <f:selectItems value="#{adminAuditLogBean.users}" var="u"
+                                           itemLabel="#{u.email}" itemValue="#{u.id}"/>
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="admin-toolbar-grow">
+                        <p:inputText value="#{adminAuditLogBean.filterEntityType}" placeholder="Entity tipi"/>
+                    </div>
+                    <div class="admin-toolbar-grow">
+                        <p:datePicker value="#{adminAuditLogBean.filterFrom}" pattern="yyyy-MM-dd"/>
+                    </div>
+                    <div class="admin-toolbar-grow">
+                        <p:datePicker value="#{adminAuditLogBean.filterTo}" pattern="yyyy-MM-dd"/>
+                    </div>
+                    <div class="admin-toolbar-actions">
+                        <p:commandButton value="Filtrele" icon="pi pi-filter"
+                                         actionListener="#{adminAuditLogBean.refresh}" update="mainForm"/>
+                    </div>
+                </div>
+
+                <p:dataTable id="logTable" value="#{adminAuditLogBean.logs}" var="l"
+                             paginator="true" rows="15" styleClass="admin-table"
+                             rowKey="#{l.id}" selectionMode="single" selection="#{adminAuditLogBean.selected}">
+                    <p:ajax event="rowSelect" oncomplete="PF('auditDetailDlg').show()" update="mainForm:auditDetailPanel"/>
+                    <p:column headerText="Tarih">
+                        <h:outputText value="#{l.createdAt}"/>
+                    </p:column>
+                    <p:column headerText="Kullanici">
+                        <h:outputText value="#{empty l.username ? (l.user != null ? l.user.email : 'Sistem') : l.username}"/>
+                    </p:column>
+                    <p:column headerText="Aksiyon">
+                        <span class="#{adminAuditLogBean.badgeClass(l.action)}"><h:outputText value="#{l.action}"/></span>
+                    </p:column>
+                    <p:column headerText="Entity">
+                        <h:outputText value="#{empty l.entityType ? '-' : l.entityType}"/>
+                    </p:column>
+                    <p:column headerText="Entity ID">
+                        <h:outputText value="#{adminAuditLogBean.shortId(l.entityId)}"/>
+                    </p:column>
+                </p:dataTable>
+
+                <p:commandButton id="auditXlsxBtn" type="button" style="display:none">
+                    <p:dataExporter type="xlsx" target="logTable" fileName="audit-log"/>
+                </p:commandButton>
+                <p:commandButton value="Excel Export" icon="pi pi-file-excel" type="button"
+                                 onclick="document.getElementById('mainForm:auditXlsxBtn').click()"/>
+            </div>
+
+            <p:dialog id="auditDetailDlg" header="Log detayi" widgetVar="auditDetailDlg" modal="true"
+                      appendTo="@body" dynamic="true" responsive="true"
+                      styleClass="admin-dialog admin-dialog-detail" style="max-width: min(95vw, 900px); width: 100%;">
+                <p:outputPanel id="auditDetailPanel" rendered="#{adminAuditLogBean.selected != null}">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <h6>Eski deger</h6>
+                            <p:inputTextarea value="#{adminAuditLogBean.selected.oldValue}" rows="12" readonly="true" styleClass="w-100"/>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Yeni deger</h6>
+                            <p:inputTextarea value="#{adminAuditLogBean.selected.newValue}" rows="12" readonly="true" styleClass="w-100"/>
+                        </div>
+                    </div>
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+    </ui:define>
+</ui:composition>

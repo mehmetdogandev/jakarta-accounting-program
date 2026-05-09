@@ -3,8 +3,10 @@ package bean;
 import entity.AppUser;
 import facadeLocal.UserFacadeLocal;
 import jakarta.ejb.EJB;
+import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
+import service.AuditService;
 
 import java.io.Serializable;
 import java.util.List;
@@ -19,16 +21,21 @@ public class UserBean implements Serializable {
     @EJB
     private UserFacadeLocal userFacade;
 
+    @EJB
+    private AuditService auditService;
+
     public void clearForm() {
         user = new AppUser();
     }
 
     public void createUser() {
         userFacade.createUser(user);
+        auditService.logAction(currentUserId(), currentUsername(), "CREATE", user);
     }
 
     public void editUser() {
         userFacade.editUser(user);
+        auditService.logAction(currentUserId(), currentUsername(), "UPDATE", user);
     }
 
     public void updateForm(AppUser u) {
@@ -37,6 +44,7 @@ public class UserBean implements Serializable {
 
     public void deleteUser(AppUser u) {
         userFacade.remove(u);
+        auditService.logAction(currentUserId(), currentUsername(), "DELETE", u);
     }
 
     public AppUser getUser() {
@@ -57,5 +65,15 @@ public class UserBean implements Serializable {
 
     public void setUsers(List<AppUser> users) {
         this.users = users;
+    }
+
+    private String currentUserId() {
+        Object id = FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("userId");
+        return id instanceof String s ? s : null;
+    }
+
+    private String currentUsername() {
+        Object u = FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("user");
+        return u instanceof AppUser au ? au.getEmail() : null;
     }
 }

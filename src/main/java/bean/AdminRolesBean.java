@@ -6,10 +6,12 @@ import enums.Scope;
 import facadeLocal.RoleFacadeLocal;
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
+import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import org.primefaces.PrimeFaces;
 import procedure.RbacProcedureBean;
+import service.AuditService;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -31,6 +33,9 @@ public class AdminRolesBean implements Serializable {
 
     @EJB
     private RbacProcedureBean rbacProcedure;
+
+    @EJB
+    private AuditService auditService;
 
     private List<Role> roles = Collections.emptyList();
     private Map<UUID, List<Permission>> permissionsByRoleId = Collections.emptyMap();
@@ -114,6 +119,7 @@ public class AdminRolesBean implements Serializable {
             }
         }
         roleFacade.save(editRole, selectedPermissions, actor);
+        auditService.logAction(actor, currentUsername(), isNew ? "CREATE" : "UPDATE", editRole);
         refresh();
         PrimeFaces.current().executeScript("PF('roleDlg').hide()");
     }
@@ -123,6 +129,7 @@ public class AdminRolesBean implements Serializable {
             return;
         }
         roleFacade.softDelete(row.getId(), rbacProcedure.currentUserId().orElse(null));
+        auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), "DELETE", row);
         refresh();
     }
 
@@ -177,5 +184,10 @@ public class AdminRolesBean implements Serializable {
 
     public void setSelectedPermissions(List<Permission> selectedPermissions) {
         this.selectedPermissions = selectedPermissions;
+    }
+
+    private String currentUsername() {
+        Object u = FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("user");
+        return u instanceof entity.AppUser au ? au.getEmail() : null;
     }
 }

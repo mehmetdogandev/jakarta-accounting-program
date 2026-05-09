@@ -19,6 +19,7 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import org.primefaces.PrimeFaces;
 import procedure.RbacProcedureBean;
+import service.AuditService;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -49,6 +50,9 @@ public class AdminExpenseBean implements Serializable {
 
     @EJB
     private RbacProcedureBean rbacProcedure;
+
+    @EJB
+    private AuditService auditService;
 
     private List<Expense> records = Collections.emptyList();
     private List<ExpenseCategory> categories = Collections.emptyList();
@@ -129,10 +133,12 @@ public class AdminExpenseBean implements Serializable {
                 ? null : cashAccountFacade.findById(parseUuid(selectedCashAccountId)));
         selected.setBankAccount(parseUuid(selectedBankAccountId) == null
                 ? null : bankAccountFacade.findById(parseUuid(selectedBankAccountId)));
-        selected.setCreatedBy(rbacProcedure.currentUserId().orElse(null));
+        String actor = rbacProcedure.currentUserId().orElse(null);
+        selected.setCreatedBy(actor);
 
         try {
             expenseFacade.save(selected);
+            auditService.logAction(actor, currentUsername(), "CREATE", selected);
             refresh();
             PrimeFaces.current().executeScript("PF('expenseDlg').hide()");
         } catch (IllegalStateException ex) {
@@ -146,7 +152,9 @@ public class AdminExpenseBean implements Serializable {
             return;
         }
         try {
-            expenseFacade.approve(row.getId(), rbacProcedure.currentUserId().orElse(null));
+            String actor = rbacProcedure.currentUserId().orElse(null);
+            expenseFacade.approve(row.getId(), actor);
+            auditService.logAction(actor, currentUsername(), "APPROVE", row);
             refresh();
         } catch (IllegalStateException ex) {
             FacesContext.getCurrentInstance().addMessage(null,
@@ -160,6 +168,7 @@ public class AdminExpenseBean implements Serializable {
         }
         try {
             expenseFacade.reject(row.getId());
+            auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), "REJECT", row);
             refresh();
         } catch (IllegalStateException ex) {
             FacesContext.getCurrentInstance().addMessage(null,
@@ -173,6 +182,7 @@ public class AdminExpenseBean implements Serializable {
         }
         try {
             expenseFacade.softDelete(row.getId());
+            auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), "DELETE", row);
             refresh();
         } catch (IllegalStateException ex) {
             FacesContext.getCurrentInstance().addMessage(null,
@@ -323,5 +333,10 @@ public class AdminExpenseBean implements Serializable {
         } catch (IllegalArgumentException ex) {
             return null;
         }
+    }
+
+    private String currentUsername() {
+        Object u = FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("user");
+        return u instanceof entity.AppUser au ? au.getEmail() : null;
     }
 }

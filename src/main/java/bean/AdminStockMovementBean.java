@@ -14,6 +14,7 @@ import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import procedure.RbacProcedureBean;
+import service.AuditService;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -39,6 +40,9 @@ public class AdminStockMovementBean implements Serializable {
 
     @EJB
     private RbacProcedureBean rbacProcedure;
+
+    @EJB
+    private AuditService auditService;
 
     private Product selectedProduct;
     private List<StockMovement> movements = Collections.emptyList();
@@ -91,6 +95,7 @@ public class AdminStockMovementBean implements Serializable {
                 rbacProcedure.currentUserId().orElse(null),
                 "ADJUSTMENT".equalsIgnoreCase(newMovement.getMovementType())
         );
+        auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), "CREATE", newMovement);
         newMovement = new StockMovement();
         newMovement.setMovementType("IN");
         newMovement.setQuantity(BigDecimal.ZERO);
@@ -168,5 +173,10 @@ public class AdminStockMovementBean implements Serializable {
         } catch (IllegalArgumentException ignored) {
             selectedProduct = null;
         }
+    }
+
+    private String currentUsername() {
+        Object u = FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("user");
+        return u instanceof entity.AppUser au ? au.getEmail() : null;
     }
 }

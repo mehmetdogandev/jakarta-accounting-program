@@ -49,6 +49,11 @@
                             rendered="#{rbac.can('ROLE_GROUP','ACCESS')}">
                         Rol grupları
                     </h:link>
+                    <h:link outcome="/admin/audit-log"
+                            styleClass="#{view.viewId == '/admin/audit-log.xhtml' ? 'admin-nav-link active' : 'admin-nav-link'}"
+                            rendered="#{rbac.can('AUDIT_LOG','ACCESS')}">
+                        Denetim Logu
+                    </h:link>
                 </div>
             </details>
             <details class="admin-sb-details">

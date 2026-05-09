@@ -14,6 +14,7 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 import org.primefaces.PrimeFaces;
 import procedure.RbacProcedureBean;
+import service.AuditService;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -36,6 +37,9 @@ public class AdminProductBean implements Serializable {
 
     @EJB
     private RbacProcedureBean rbacProcedure;
+
+    @EJB
+    private AuditService auditService;
 
     private List<Product> products = Collections.emptyList();
     private List<ProductCategory> categories = Collections.emptyList();
@@ -103,6 +107,7 @@ public class AdminProductBean implements Serializable {
             return;
         }
         productFacade.save(selected);
+        auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), isNew ? "CREATE" : "UPDATE", selected);
         refresh();
         PrimeFaces.current().executeScript("PF('productDlg').hide()");
     }
@@ -112,6 +117,7 @@ public class AdminProductBean implements Serializable {
             return;
         }
         productFacade.softDelete(row.getId());
+        auditService.logAction(rbacProcedure.currentUserId().orElse(null), currentUsername(), "DELETE", row);
         refresh();
     }
 
@@ -164,5 +170,10 @@ public class AdminProductBean implements Serializable {
 
     public Product getSelectedForMovement() {
         return selectedForMovement;
+    }
+
+    private String currentUsername() {
+        Object u = FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("user");
+        return u instanceof entity.AppUser au ? au.getEmail() : null;
     }
 }
