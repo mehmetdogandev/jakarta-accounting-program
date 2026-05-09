@@ -1,6 +1,5 @@
 package service;
 
-import entity.AppUser;
 import entity.AuditLog;
 import jakarta.ejb.Stateless;
 import jakarta.json.Json;
@@ -11,6 +10,8 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import java.beans.Introspector;
 import java.lang.reflect.Method;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -31,35 +32,17 @@ public class AuditService {
                     String oldValue,
                     String newValue,
                     HttpServletRequest request) {
-        AuditLog row = new AuditLog();
-        if (userId != null && !userId.isBlank()) {
-            AppUser user = entityManager.find(AppUser.class, userId);
-            row.setUser(user);
-        }
-        row.setUsername(username);
-        row.setAction(normalize(action));
-        row.setEntityType(entityType);
-        row.setEntityId(entityId);
-        row.setOldValue(oldValue);
-        row.setNewValue(newValue);
+        String ipAddress = null;
+        String userAgent = null;
         if (request != null) {
-            row.setIpAddress(request.getRemoteAddr());
-            row.setUserAgent(request.getHeader("User-Agent"));
+            ipAddress = request.getRemoteAddr();
+            userAgent = request.getHeader("User-Agent");
         }
-        entityManager.persist(row);
+        insertLogRow(userId, username, normalize(action), entityType, entityId, oldValue, newValue, ipAddress, userAgent);
     }
 
     public void logLogin(String userId, String username, String ip, String userAgent, boolean success) {
-        AuditLog row = new AuditLog();
-        if (userId != null && !userId.isBlank()) {
-            row.setUser(entityManager.find(AppUser.class, userId));
-        }
-        row.setUsername(username);
-        row.setAction(success ? "LOGIN" : "LOGIN_FAILED");
-        row.setEntityType("Auth");
-        row.setIpAddress(ip);
-        row.setUserAgent(userAgent);
-        entityManager.persist(row);
+        insertLogRow(userId, username, success ? "LOGIN" : "LOGIN_FAILED", "Auth", null, null, null, ip, userAgent);
     }
 
     public void logAction(String userId, String username, String action, Object entity) {
@@ -154,5 +137,31 @@ public class AuditService {
             return null;
         }
         return null;
+    }
+
+    private void insertLogRow(String userId,
+                              String username,
+                              String action,
+                              String entityType,
+                              UUID entityId,
+                              String oldValue,
+                              String newValue,
+                              String ipAddress,
+                              String userAgent) {
+        entityManager.createNativeQuery(
+                        "INSERT INTO audit_log (id, user_id, username, action, entity_type, entity_id, old_value, new_value, ip_address, user_agent, created_at) "
+                                + "VALUES (:id, :userId, :username, :action, :entityType, :entityId, :oldValue, :newValue, :ipAddress, :userAgent, :createdAt)")
+                .setParameter("id", UUID.randomUUID())
+                .setParameter("userId", userId)
+                .setParameter("username", username)
+                .setParameter("action", normalize(action))
+                .setParameter("entityType", entityType)
+                .setParameter("entityId", entityId)
+                .setParameter("oldValue", oldValue)
+                .setParameter("newValue", newValue)
+                .setParameter("ipAddress", ipAddress)
+                .setParameter("userAgent", userAgent)
+                .setParameter("createdAt", Timestamp.from(Instant.now()))
+                .executeUpdate();
     }
 }
