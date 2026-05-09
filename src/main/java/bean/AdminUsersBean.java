@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 
 @Named
 @ViewScoped
@@ -409,6 +408,14 @@ public class AdminUsersBean implements Serializable {
 
     public int getPickerRolesPageEnd() {
         return (int) Math.min(firstRolePicker + PICKER_PAGE_SIZE, getPickerRolesCount());
+    }
+
+    public int getPickerGroupsPageStart() {
+        long c = getPickerRoleGroupsCount();
+        if (c == 0) {
+            return 0;
+        }
+        return firstGroupPicker + 1;
     }
 
     public int getPickerGroupsPageEnd() {
