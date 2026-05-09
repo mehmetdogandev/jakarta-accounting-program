@@ -2,6 +2,8 @@ package service;
 
 import entity.AuditLog;
 import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
 import jakarta.json.Json;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.persistence.EntityManager;
@@ -17,13 +19,18 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Stateless
 public class AuditService {
 
+    private static final Logger LOG = Logger.getLogger(AuditService.class.getName());
+
     @PersistenceContext(unitName = "testPU")
     private EntityManager entityManager;
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void log(String userId,
                     String username,
                     String action,
@@ -41,10 +48,12 @@ public class AuditService {
         insertLogRow(userId, username, normalize(action), entityType, entityId, oldValue, newValue, ipAddress, userAgent);
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void logLogin(String userId, String username, String ip, String userAgent, boolean success) {
         insertLogRow(userId, username, success ? "LOGIN" : "LOGIN_FAILED", "Auth", null, null, null, ip, userAgent);
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void logAction(String userId, String username, String action, Object entity) {
         UUID entityId = tryReadUuidId(entity);
         log(userId, username, action, entity == null ? null : entity.getClass().getSimpleName(),
@@ -148,20 +157,24 @@ public class AuditService {
                               String newValue,
                               String ipAddress,
                               String userAgent) {
-        entityManager.createNativeQuery(
-                        "INSERT INTO audit_log (id, user_id, username, action, entity_type, entity_id, old_value, new_value, ip_address, user_agent, created_at) "
-                                + "VALUES (:id, :userId, :username, :action, :entityType, :entityId, :oldValue, :newValue, :ipAddress, :userAgent, :createdAt)")
-                .setParameter("id", UUID.randomUUID())
-                .setParameter("userId", userId)
-                .setParameter("username", username)
-                .setParameter("action", normalize(action))
-                .setParameter("entityType", entityType)
-                .setParameter("entityId", entityId)
-                .setParameter("oldValue", oldValue)
-                .setParameter("newValue", newValue)
-                .setParameter("ipAddress", ipAddress)
-                .setParameter("userAgent", userAgent)
-                .setParameter("createdAt", Timestamp.from(Instant.now()))
-                .executeUpdate();
+        try {
+            entityManager.createNativeQuery(
+                            "INSERT INTO audit_log (id, user_id, username, action, entity_type, entity_id, old_value, new_value, ip_address, user_agent, created_at) "
+                                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+                    .setParameter(1, UUID.randomUUID())
+                    .setParameter(2, userId)
+                    .setParameter(3, username)
+                    .setParameter(4, normalize(action))
+                    .setParameter(5, entityType)
+                    .setParameter(6, entityId)
+                    .setParameter(7, oldValue)
+                    .setParameter(8, newValue)
+                    .setParameter(9, ipAddress)
+                    .setParameter(10, userAgent)
+                    .setParameter(11, Timestamp.from(Instant.now()))
+                    .executeUpdate();
+        } catch (RuntimeException ex) {
+            LOG.log(Level.WARNING, "Audit insert failed; business flow continues.", ex);
+        }
     }
 }
