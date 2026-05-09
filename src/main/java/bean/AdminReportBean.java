@@ -109,6 +109,10 @@ public class AdminReportBean implements Serializable {
         };
     }
 
+    public String reportTypeLabel(String type) {
+        return getReportTypeLabel(type);
+    }
+
     public String statusClass(Object overdue) {
         return Boolean.TRUE.equals(overdue) ? "text-danger fw-semibold" : "";
     }

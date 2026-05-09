@@ -26,10 +26,10 @@ public class ReportFacade extends AbstractFacade implements ReportFacadeLocal {
                                 + "JOIN journal_entry j ON j.id = l.journal_entry_id "
                                 + "WHERE j.status = 'POSTED' "
                                 + "AND j.deleted_at IS NULL "
-                                + "AND j.entry_date <= :as_of "
+                                + "AND j.entry_date <= ? "
                                 + "GROUP BY l.account_code, l.account_name "
                                 + "ORDER BY l.account_code")
-                .setParameter("as_of", Date.valueOf(asOf))
+                .setParameter(1, Date.valueOf(asOf))
                 .getResultList();
         List<Map<String, Object>> out = new ArrayList<>();
         for (Object rowObj : rows) {
@@ -55,7 +55,7 @@ public class ReportFacade extends AbstractFacade implements ReportFacadeLocal {
                         + "WHERE e.deleted_at IS NULL "
                         + "AND e.status = 'APPROVED' "
                         + "AND e.transaction_type = 'INCOME' "
-                        + "AND e.transaction_date BETWEEN :from AND :to",
+                        + "AND e.transaction_date BETWEEN ? AND ?",
                 from, to);
         BigDecimal expenses = singleAmount(
                 "SELECT COALESCE(SUM(e.amount), 0) "
@@ -63,7 +63,7 @@ public class ReportFacade extends AbstractFacade implements ReportFacadeLocal {
                         + "WHERE e.deleted_at IS NULL "
                         + "AND e.status = 'APPROVED' "
                         + "AND e.transaction_type = 'EXPENSE' "
-                        + "AND e.transaction_date BETWEEN :from AND :to",
+                        + "AND e.transaction_date BETWEEN ? AND ?",
                 from, to);
         BigDecimal salesRevenue = hasInvoiceTable()
                 ? singleAmount(
@@ -72,14 +72,14 @@ public class ReportFacade extends AbstractFacade implements ReportFacadeLocal {
                         + "WHERE i.deleted_at IS NULL "
                         + "AND i.status = 'POSTED' "
                         + "AND i.invoice_type = 'SALES' "
-                        + "AND i.invoice_date BETWEEN :from AND :to",
+                        + "AND i.invoice_date BETWEEN ? AND ?",
                 from, to)
                 : BigDecimal.ZERO;
         BigDecimal cogs = singleAmount(
                 "SELECT COALESCE(SUM(sm.quantity * sm.unit_cost), 0) "
                         + "FROM stock_movement sm "
                         + "WHERE sm.movement_type = 'OUT' "
-                        + "AND DATE(sm.movement_date) BETWEEN :from AND :to",
+                        + "AND DATE(sm.movement_date) BETWEEN ? AND ?",
                 from, to);
 
         BigDecimal grossProfit = salesRevenue.subtract(cogs);
@@ -101,25 +101,25 @@ public class ReportFacade extends AbstractFacade implements ReportFacadeLocal {
                 "SELECT COALESCE(SUM(ct.amount), 0) "
                         + "FROM cash_transaction ct "
                         + "WHERE ct.transaction_type = 'IN' "
-                        + "AND ct.transaction_date BETWEEN :from AND :to",
+                        + "AND ct.transaction_date BETWEEN ? AND ?",
                 from, to);
         BigDecimal cashOut = singleAmount(
                 "SELECT COALESCE(SUM(ct.amount), 0) "
                         + "FROM cash_transaction ct "
                         + "WHERE ct.transaction_type = 'OUT' "
-                        + "AND ct.transaction_date BETWEEN :from AND :to",
+                        + "AND ct.transaction_date BETWEEN ? AND ?",
                 from, to);
         BigDecimal bankIn = singleAmount(
                 "SELECT COALESCE(SUM(bt.amount), 0) "
                         + "FROM bank_transaction bt "
                         + "WHERE bt.transaction_type = 'IN' "
-                        + "AND bt.transaction_date BETWEEN :from AND :to",
+                        + "AND bt.transaction_date BETWEEN ? AND ?",
                 from, to);
         BigDecimal bankOut = singleAmount(
                 "SELECT COALESCE(SUM(bt.amount), 0) "
                         + "FROM bank_transaction bt "
                         + "WHERE bt.transaction_type = 'OUT' "
-                        + "AND bt.transaction_date BETWEEN :from AND :to",
+                        + "AND bt.transaction_date BETWEEN ? AND ?",
                 from, to);
         BigDecimal net = cashIn.subtract(cashOut).add(bankIn.subtract(bankOut));
         out.put("cashIn", cashIn);
@@ -245,8 +245,8 @@ public class ReportFacade extends AbstractFacade implements ReportFacadeLocal {
 
     private BigDecimal singleAmount(String sql, LocalDate from, LocalDate to) {
         Object value = entityManager.createNativeQuery(sql)
-                .setParameter("from", Date.valueOf(from))
-                .setParameter("to", Date.valueOf(to))
+                .setParameter(1, Date.valueOf(from))
+                .setParameter(2, Date.valueOf(to))
                 .getSingleResult();
         return asBigDecimal(value);
     }
