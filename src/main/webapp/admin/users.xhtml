@@ -176,94 +176,96 @@
                             </h:panelGroup>
                         </div>
 
-                        <p:accordionPanel id="assignAccordion" multiple="false" styleClass="admin-user-assign-accordion"
-                                          rendered="#{adminUsersBean.canManageAssignments()}">
-                            <p:tab title="Rol ata">
-                                <p:outputPanel id="rolePickerPanel" layout="block">
-                                    <p:inputText value="#{adminUsersBean.rolePickerSearch}" placeholder="Rol adı ara…"
-                                                 styleClass="form-control mb-2">
-                                        <p:ajax event="keyup" delay="350" listener="#{adminUsersBean.refreshRolePicker}"
-                                                update="mainForm:rolePickerPanel mainForm:msgs"/>
-                                    </p:inputText>
-                                    <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
-                                        <h:outputText value="#{adminUsersBean.pickerRolesPageStart}–#{adminUsersBean.pickerRolesPageEnd} / #{adminUsersBean.pickerRolesCount}"/>
-                                        <div class="btn-group btn-group-sm">
-                                            <p:commandButton icon="pi pi-angle-left" styleClass="ui-button-secondary"
-                                                             actionListener="#{adminUsersBean.pickerRolesPrev}"
-                                                             disabled="#{not adminUsersBean.pickerRolesHasPrev}"
-                                                             update="mainForm:rolePickerPanel"/>
-                                            <p:commandButton icon="pi pi-angle-right" styleClass="ui-button-secondary"
-                                                             actionListener="#{adminUsersBean.pickerRolesNext}"
-                                                             disabled="#{not adminUsersBean.pickerRolesHasNext}"
-                                                             update="mainForm:rolePickerPanel"/>
-                                        </div>
+                        <p:fieldset id="roleAssignFieldset" legend="Rol ata" toggleable="true" collapsed="false"
+                                    styleClass="admin-user-assign-fieldset mb-3"
+                                    rendered="#{adminUsersBean.canManageAssignments()}">
+                            <p:outputPanel id="rolePickerPanel" layout="block">
+                                <p:inputText value="#{adminUsersBean.rolePickerSearch}" placeholder="Rol adı ara…"
+                                             styleClass="form-control mb-2">
+                                    <p:ajax event="keyup" delay="350" listener="#{adminUsersBean.refreshRolePicker}"
+                                            update="mainForm:rolePickerPanel mainForm:msgs"/>
+                                </p:inputText>
+                                <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
+                                    <h:outputText value="#{adminUsersBean.pickerRolesPageStart}–#{adminUsersBean.pickerRolesPageEnd} / #{adminUsersBean.pickerRolesCount}"/>
+                                    <div class="btn-group btn-group-sm">
+                                        <p:commandButton icon="pi pi-angle-left" styleClass="ui-button-secondary"
+                                                         actionListener="#{adminUsersBean.pickerRolesPrev}"
+                                                         disabled="#{not adminUsersBean.pickerRolesHasPrev}"
+                                                         update="mainForm:rolePickerPanel"/>
+                                        <p:commandButton icon="pi pi-angle-right" styleClass="ui-button-secondary"
+                                                         actionListener="#{adminUsersBean.pickerRolesNext}"
+                                                         disabled="#{not adminUsersBean.pickerRolesHasNext}"
+                                                         update="mainForm:rolePickerPanel"/>
                                     </div>
-                                    <div class="admin-picker-list">
-                                        <ui:repeat value="#{adminUsersBean.pickerRoles}" var="pr">
-                                            <div class="d-flex justify-content-between align-items-center py-1 border-bottom border-light">
-                                                <div>
-                                                    <strong><h:outputText value="#{pr.name}"/></strong>
-                                                    <span class="text-muted small ms-1">(<h:outputText value="#{pr.scope}"/>)</span>
-                                                </div>
-                                                <p:commandButton value="Ekle" icon="pi pi-plus"
-                                                                 styleClass="admin-btn-outline btn-sm"
-                                                                 actionListener="#{adminUsersBean.assignPickerRole(pr)}"
-                                                                 update="mainForm:assignedBlocks mainForm:rolePickerPanel mainForm:msgs"
-                                                                 rendered="#{adminUsersBean.canManageAssignments()}"/>
+                                </div>
+                                <div class="admin-picker-list">
+                                    <ui:repeat value="#{adminUsersBean.pickerRoles}" var="pr">
+                                        <div class="d-flex justify-content-between align-items-center py-1 border-bottom border-light">
+                                            <div>
+                                                <strong><h:outputText value="#{pr.name}"/></strong>
+                                                <span class="text-muted small ms-1">(<h:outputText value="#{pr.scope}"/>)</span>
                                             </div>
-                                        </ui:repeat>
-                                        <h:panelGroup rendered="#{empty adminUsersBean.pickerRoles}">
-                                            <span class="text-muted small">Sonuç yok veya tüm roller atanmış.</span>
-                                        </h:panelGroup>
-                                    </div>
-                                </p:outputPanel>
-                            </p:tab>
-                            <p:tab title="Rol grubu ata">
-                                <p:outputPanel id="groupPickerPanel" layout="block">
-                                    <p:inputText value="#{adminUsersBean.groupPickerSearch}" placeholder="Başlık veya açıklama ara…"
-                                                 styleClass="form-control mb-2">
-                                        <p:ajax event="keyup" delay="350" listener="#{adminUsersBean.refreshGroupPicker}"
-                                                update="mainForm:groupPickerPanel mainForm:msgs"/>
-                                    </p:inputText>
-                                    <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
-                                        <h:outputText value="#{adminUsersBean.pickerGroupsPageStart}–#{adminUsersBean.pickerGroupsPageEnd} / #{adminUsersBean.pickerRoleGroupsCount}"/>
-                                        <div class="btn-group btn-group-sm">
-                                            <p:commandButton icon="pi pi-angle-left" styleClass="ui-button-secondary"
-                                                             actionListener="#{adminUsersBean.pickerGroupsPrev}"
-                                                             disabled="#{not adminUsersBean.pickerGroupsHasPrev}"
-                                                             update="mainForm:groupPickerPanel"/>
-                                            <p:commandButton icon="pi pi-angle-right" styleClass="ui-button-secondary"
-                                                             actionListener="#{adminUsersBean.pickerGroupsNext}"
-                                                             disabled="#{not adminUsersBean.pickerGroupsHasNext}"
-                                                             update="mainForm:groupPickerPanel"/>
+                                            <p:commandButton value="Ekle" icon="pi pi-plus"
+                                                             styleClass="admin-btn-outline btn-sm"
+                                                             actionListener="#{adminUsersBean.assignPickerRole(pr)}"
+                                                             update="mainForm:assignedBlocks mainForm:rolePickerPanel mainForm:msgs"
+                                                             rendered="#{adminUsersBean.canManageAssignments()}"/>
                                         </div>
+                                    </ui:repeat>
+                                    <h:panelGroup rendered="#{empty adminUsersBean.pickerRoles}">
+                                        <span class="text-muted small">Sonuç yok veya tüm roller atanmış.</span>
+                                    </h:panelGroup>
+                                </div>
+                            </p:outputPanel>
+                        </p:fieldset>
+
+                        <p:fieldset id="groupAssignFieldset" legend="Rol grubu ata" toggleable="true" collapsed="true"
+                                    styleClass="admin-user-assign-fieldset mb-3"
+                                    rendered="#{adminUsersBean.canManageAssignments()}">
+                            <p:outputPanel id="groupPickerPanel" layout="block">
+                                <p:inputText value="#{adminUsersBean.groupPickerSearch}" placeholder="Başlık veya açıklama ara…"
+                                             styleClass="form-control mb-2">
+                                    <p:ajax event="keyup" delay="350" listener="#{adminUsersBean.refreshGroupPicker}"
+                                            update="mainForm:groupPickerPanel mainForm:msgs"/>
+                                </p:inputText>
+                                <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
+                                    <h:outputText value="#{adminUsersBean.pickerGroupsPageStart}–#{adminUsersBean.pickerGroupsPageEnd} / #{adminUsersBean.pickerRoleGroupsCount}"/>
+                                    <div class="btn-group btn-group-sm">
+                                        <p:commandButton icon="pi pi-angle-left" styleClass="ui-button-secondary"
+                                                         actionListener="#{adminUsersBean.pickerGroupsPrev}"
+                                                         disabled="#{not adminUsersBean.pickerGroupsHasPrev}"
+                                                         update="mainForm:groupPickerPanel"/>
+                                        <p:commandButton icon="pi pi-angle-right" styleClass="ui-button-secondary"
+                                                         actionListener="#{adminUsersBean.pickerGroupsNext}"
+                                                         disabled="#{not adminUsersBean.pickerGroupsHasNext}"
+                                                         update="mainForm:groupPickerPanel"/>
                                     </div>
-                                    <div class="admin-picker-list">
-                                        <ui:repeat value="#{adminUsersBean.pickerRoleGroups}" var="pg">
-                                            <div class="d-flex justify-content-between align-items-center py-1 border-bottom border-light">
-                                                <div>
-                                                    <strong><h:outputText value="#{pg.title}"/></strong>
-                                                    <div class="text-muted small text-truncate" style="max-width:14rem;">
-                                                        <h:outputText value="#{pg.description}"/>
-                                                    </div>
+                                </div>
+                                <div class="admin-picker-list">
+                                    <ui:repeat value="#{adminUsersBean.pickerRoleGroups}" var="pg">
+                                        <div class="d-flex justify-content-between align-items-center py-1 border-bottom border-light">
+                                            <div>
+                                                <strong><h:outputText value="#{pg.title}"/></strong>
+                                                <div class="text-muted small text-truncate" style="max-width:14rem;">
+                                                    <h:outputText value="#{pg.description}"/>
                                                 </div>
-                                                <p:commandButton value="Ekle" icon="pi pi-plus"
-                                                                 styleClass="admin-btn-outline btn-sm"
-                                                                 actionListener="#{adminUsersBean.assignPickerRoleGroup(pg)}"
-                                                                 update="mainForm:assignedBlocks mainForm:groupPickerPanel mainForm:msgs"
-                                                                 rendered="#{adminUsersBean.canManageAssignments()}"/>
                                             </div>
-                                        </ui:repeat>
-                                        <h:panelGroup rendered="#{empty adminUsersBean.pickerRoleGroups}">
-                                            <span class="text-muted small">Sonuç yok veya tüm gruplar atanmış.</span>
-                                        </h:panelGroup>
-                                    </div>
-                                </p:outputPanel>
-                            </p:tab>
-                        </p:accordionPanel>
+                                            <p:commandButton value="Ekle" icon="pi pi-plus"
+                                                             styleClass="admin-btn-outline btn-sm"
+                                                             actionListener="#{adminUsersBean.assignPickerRoleGroup(pg)}"
+                                                             update="mainForm:assignedBlocks mainForm:groupPickerPanel mainForm:msgs"
+                                                             rendered="#{adminUsersBean.canManageAssignments()}"/>
+                                        </div>
+                                    </ui:repeat>
+                                    <h:panelGroup rendered="#{empty adminUsersBean.pickerRoleGroups}">
+                                        <span class="text-muted small">Sonuç yok veya tüm gruplar atanmış.</span>
+                                    </h:panelGroup>
+                                </div>
+                            </p:outputPanel>
+                        </p:fieldset>
                     </h:panelGroup>
 
-                    <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top">
+                    <div class="admin-dialog-footer d-flex flex-wrap justify-content-end gap-2">
                         <p:commandButton value="Kaydet" icon="pi pi-check" styleClass="admin-btn-primary"
                                          action="#{adminUsersBean.save}"
                                          update="mainForm" process="@form"

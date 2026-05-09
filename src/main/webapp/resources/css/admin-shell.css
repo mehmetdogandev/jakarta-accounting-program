@@ -368,3 +368,16 @@
     width: 1.35rem;
     height: 1.35rem;
 }
+
+/*
+ * PrimeFaces modal: dim the entire viewport (sidebar + top bars + main content).
+ * Overlay above shell chrome (.admin-topbar 1020) and Bootstrap offcanvas (1045);
+ * dialog above overlay.
+ */
+.admin-body .ui-widget-overlay {
+    z-index: 1060 !important;
+}
+
+.admin-body .ui-dialog {
+    z-index: 1070 !important;
+}

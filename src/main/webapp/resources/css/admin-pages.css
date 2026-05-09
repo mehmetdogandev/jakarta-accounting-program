@@ -318,14 +318,62 @@
     color: var(--admin-page-teal-dark);
 }
 
+/* PrimeFaces dialogs — shadcn-like card chrome (neutral border + layered shadow) */
+.admin-dialog.ui-dialog {
+    border-radius: 0.75rem !important;
+    border: 1px solid var(--admin-page-border) !important;
+    box-shadow:
+        0 4px 6px -1px rgba(15, 23, 42, 0.07),
+        0 12px 28px -8px rgba(15, 23, 42, 0.14),
+        0 0 0 1px rgba(15, 23, 42, 0.03) !important;
+    overflow: hidden;
+}
+
 .admin-dialog .ui-dialog-titlebar {
     background: #fff !important;
+    border: none !important;
     border-bottom: 1px solid var(--admin-page-border) !important;
+    padding: 0.65rem 1rem !important;
+}
+
+.admin-dialog .ui-dialog-title {
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    color: var(--admin-page-heading) !important;
+}
+
+.admin-dialog .ui-dialog-content {
+    padding: 1.25rem 1.5rem !important;
+    background: #fff !important;
+}
+
+.admin-dialog-footer {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--admin-page-border);
+}
+
+.admin-dialog-section {
+    padding: 1rem 0;
+    border-top: 1px solid var(--admin-page-border);
+}
+
+.admin-dialog-section:first-child {
+    border-top: none;
+    padding-top: 0;
 }
 
 .admin-user-mgmt-dialog .ui-dialog-content {
     max-height: min(85vh, 42rem);
     overflow-y: auto;
+}
+
+.admin-user-mgmt-dialog .admin-user-mgmt-header {
+    padding: 1rem 1.15rem;
+    border: 1px solid var(--admin-page-border);
+    border-radius: 0.65rem;
+    background: #f8fafc;
+    margin-bottom: 1.25rem !important;
 }
 
 .admin-avatar-lg {
@@ -343,8 +391,20 @@
     background: #fafafa;
 }
 
-.admin-user-assign-accordion .ui-accordion-header {
-    font-size: 0.85rem !important;
+.admin-user-assign-fieldset.ui-fieldset {
+    border-radius: 0.65rem !important;
+    border: 1px solid var(--admin-page-border) !important;
+    background: #fff !important;
+}
+
+.admin-user-assign-fieldset.ui-fieldset .ui-fieldset-legend {
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    color: var(--admin-page-heading) !important;
+}
+
+.admin-user-assign-fieldset.ui-fieldset .ui-fieldset-content {
+    padding: 0.25rem 0.25rem 0.5rem !important;
 }
 
 .admin-picker-list {
