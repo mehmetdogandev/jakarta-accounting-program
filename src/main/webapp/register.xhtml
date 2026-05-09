@@ -1,32 +1,126 @@
-<ui:composition template="/template.xhtml"
-                xmlns:ui="jakarta.faces.facelets"
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
                 xmlns:h="jakarta.faces.html"
-                xmlns:f="jakarta.faces.core">
-    <ui:define name="mainContent">
-        <h:form>
-            <div class="container" style="max-width:420px">
-                <h:messages globalOnly="true" infoClass="alert alert-success" errorClass="alert alert-danger"/>
-                <h2 class="mb-3">Kayıt ol</h2>
-                <div class="mb-3">
-                    <label class="form-label">E-posta</label>
-                    <h:inputText styleClass="form-control" value="#{registerBean.user.email}" required="true"/>
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/auth-template.xhtml">
+    <ui:define name="title">Kayıt — Jakarta Muhasebe</ui:define>
+
+    <ui:define name="authAside">
+        <div class="auth-brand">
+            <span class="auth-brand-badge">JM</span>
+            <span class="auth-brand-name">Jakarta Muhasebe</span>
+        </div>
+        <h1 class="auth-headline">
+            Hesap oluşturun,<br/>
+            <span class="teal">yönetime başlayın</span>
+        </h1>
+        <p class="auth-lead">
+            Birkaç bilgi ile kayıt olun; ardından güvenli oturumla panele erişin.
+        </p>
+        <div class="auth-features">
+            <div class="auth-feature">
+                <span class="auth-feature-icon teal" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                    </svg>
+                </span>
+                <div>
+                    <h3>Bilgilerinizi girin</h3>
+                    <p>E-posta ve şifre ile hesabınızı oluşturun.</p>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Şifre</label>
-                    <h:inputSecret styleClass="form-control" value="#{registerBean.user.password}" required="true"/>
+            </div>
+            <div class="auth-feature">
+                <span class="auth-feature-icon blue" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="5" y="11" width="14" height="10" rx="2"/>
+                        <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                </span>
+                <div>
+                    <h3>Güvenli kayıt</h3>
+                    <p>Şifreniz sunucuda saklanır; giriş e-posta ile yapılır.</p>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Ad</label>
-                    <h:inputText styleClass="form-control" value="#{registerBean.user.name}"/>
+            </div>
+            <div class="auth-feature">
+                <span class="auth-feature-icon violet" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                        <path d="M22 4L12 14.01l-3-3"/>
+                    </svg>
+                </span>
+                <div>
+                    <h3>Hızlı başlangıç</h3>
+                    <p>Kayıt sonrası giriş yaparak devam edin.</p>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Soyad</label>
-                    <h:inputText styleClass="form-control" value="#{registerBean.user.surname}"/>
-                </div>
-                <h:commandButton styleClass="btn btn-primary w-100 mb-2" value="Kayıt ol" action="#{registerBean.register()}"/>
-                <div class="text-center">
-                    <h:link outcome="/login" value="Girişe dön"/>
-                </div>
+            </div>
+        </div>
+    </ui:define>
+
+    <ui:define name="authCard">
+        <h:form id="registerForm">
+            <h2 class="auth-card-title">Hesap oluştur</h2>
+            <p class="auth-card-sub">Bilgilerinizi doldurarak başlayın</p>
+
+            <h:messages id="register-global" globalOnly="true" layout="list"
+                        infoClass="alert alert-success"
+                        errorClass="alert alert-danger"
+                        warnClass="alert alert-warning"
+                        styleClass="auth-messages list-unstyled mb-3"/>
+
+            <div class="mb-3">
+                <h:outputLabel for="regEmail" styleClass="auth-form-label" value="E-posta"/>
+                <h:inputText id="regEmail" type="email"
+                             styleClass="auth-form-control"
+                             autocomplete="email"
+                             required="true"
+                             requiredMessage="E-posta zorunlu."
+                             value="#{registerBean.user.email}">
+                    <f:passThroughAttribute name="placeholder" value="ornek@email.com"/>
+                </h:inputText>
+            </div>
+            <div class="mb-3">
+                <h:outputLabel for="regPass" styleClass="auth-form-label" value="Şifre"/>
+                <h:inputSecret id="regPass"
+                               styleClass="auth-form-control"
+                               autocomplete="new-password"
+                               required="true"
+                               requiredMessage="Şifre zorunlu."
+                               value="#{registerBean.user.password}">
+                    <f:passThroughAttribute name="placeholder" value="En az bir şifre girin"/>
+                </h:inputSecret>
+            </div>
+            <div class="mb-3">
+                <h:outputLabel for="regName" styleClass="auth-form-label" value="Ad"/>
+                <h:inputText id="regName"
+                             styleClass="auth-form-control"
+                             autocomplete="given-name"
+                             value="#{registerBean.user.name}">
+                    <f:passThroughAttribute name="placeholder" value="Adınız"/>
+                </h:inputText>
+            </div>
+            <div class="mb-3">
+                <h:outputLabel for="regSurname" styleClass="auth-form-label" value="Soyad"/>
+                <h:inputText id="regSurname"
+                             styleClass="auth-form-control"
+                             autocomplete="family-name"
+                             value="#{registerBean.user.surname}">
+                    <f:passThroughAttribute name="placeholder" value="Soyadınız"/>
+                </h:inputText>
+            </div>
+
+            <h:commandButton id="submitRegister"
+                             type="submit"
+                             styleClass="auth-btn-primary"
+                             value="Kayıt ol"
+                             action="#{registerBean.register()}"/>
+
+            <div class="auth-divider" role="separator"><span>veya</span></div>
+
+            <div class="auth-footer-link">
+                Zaten hesabınız var mı?
+                <h:link outcome="/login.xhtml" value="Giriş yap"/>
             </div>
         </h:form>
     </ui:define>

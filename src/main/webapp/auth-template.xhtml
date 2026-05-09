@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="tr"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets"
+      xmlns:h="jakarta.faces.html">
+<f:view locale="tr">
+    <h:head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1"/>
+        <title><ui:insert name="title">Jakarta Muhasebe</ui:insert></title>
+        <link rel="preconnect" href="https://fonts.googleapis.com"/>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+        <h:outputStylesheet library="css" name="bootstrap.min.css"/>
+        <h:outputStylesheet library="css" name="auth.css"/>
+        <ui:insert name="headExtra"/>
+    </h:head>
+    <h:body styleClass="auth-body">
+        <div class="auth-shell">
+            <aside class="auth-aside">
+                <ui:insert name="authAside"/>
+            </aside>
+            <main class="auth-main">
+                <div class="auth-card">
+                    <ui:insert name="authCard"/>
+                </div>
+            </main>
+        </div>
+        <h:outputScript library="js" name="bootstrap.bundle.min.js"/>
+    </h:body>
+</f:view>
+</html>

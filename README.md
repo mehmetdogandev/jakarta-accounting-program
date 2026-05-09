@@ -146,16 +146,19 @@ Bu WAR dosyasını Payara’ya deploy edin (IDE artefact, `autodeploy` klasörü
 
 - Örnek: `http://localhost:8080/accounting/login.xhtml`
 
-### 6. Varsayılan seed kullanıcı
+### 6. Varsayılan seed kullanıcı ve RBAC
 
-Migrasyonlar sonrası:
+Migrasyonlar sonrası ([`V3__super_admin_rbac_seed.sql`](src/main/resources/db/migration/V3__super_admin_rbac_seed.sql)):
 
 | Alan | Değer |
 |------|--------|
-| E-posta | `admin@example.com` |
-| Şifre | `admin` |
+| E-posta | `admin@admin.com` |
+| Şifre | `admin123` |
+| Ad / soyad | `admin` / `user` |
 
-Ek olarak [`V2__admin_scope_roles.sql`](src/main/resources/db/migration/V2__admin_scope_roles.sql) ile admin kullanıcıya **ROLE** ve **ROLE_GROUP** scope menüleri için roller bağlanır.
+Giriş **e-posta ile** yapılır (`username` kolonu yok).
+
+RBAC: **USER**, **ROLE** ve **ROLE_GROUP** scope’ları ile her `app_permission` değeri için **ayrı bir rol** ve tek satır `role_permission` oluşturulur (**toplam 30 rol**). **`super_admin`** adlı bir **rol grubu** bu 30 rolün tamamını içerir; varsayılan admin kullanıcıya **yalnızca bu rol grubu** atanır (`user_role_group`). Eski seed tek-parça roller ([`V1`](src/main/resources/db/migration/V1__initial_schema.sql), [`V2`](src/main/resources/db/migration/V2__admin_scope_roles.sql)) **soft-delete** edilir ve doğrudan `user_role` bağları kaldırılır.
 
 ---
 
