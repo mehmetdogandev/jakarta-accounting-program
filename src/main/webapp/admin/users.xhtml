@@ -176,10 +176,10 @@
                             </h:panelGroup>
                         </div>
 
-                        <p:fieldset id="roleAssignFieldset" legend="Rol ata" toggleable="true" collapsed="false"
-                                    styleClass="admin-user-assign-fieldset mb-3"
-                                    rendered="#{adminUsersBean.canManageAssignments()}">
-                            <p:outputPanel id="rolePickerPanel" layout="block">
+                        <ui:fragment rendered="#{adminUsersBean.canManageAssignments()}">
+                        <details class="admin-user-assign-details mb-3" open="open">
+                            <summary class="admin-user-assign-summary">Rol ata</summary>
+                            <p:outputPanel id="rolePickerPanel" layout="block" styleClass="pt-2">
                                 <p:inputText value="#{adminUsersBean.rolePickerSearch}" placeholder="Rol adı ara…"
                                              styleClass="form-control mb-2">
                                     <p:ajax event="keyup" delay="350" listener="#{adminUsersBean.refreshRolePicker}"
@@ -217,12 +217,13 @@
                                     </h:panelGroup>
                                 </div>
                             </p:outputPanel>
-                        </p:fieldset>
+                        </details>
+                        </ui:fragment>
 
-                        <p:fieldset id="groupAssignFieldset" legend="Rol grubu ata" toggleable="true" collapsed="true"
-                                    styleClass="admin-user-assign-fieldset mb-3"
-                                    rendered="#{adminUsersBean.canManageAssignments()}">
-                            <p:outputPanel id="groupPickerPanel" layout="block">
+                        <ui:fragment rendered="#{adminUsersBean.canManageAssignments()}">
+                        <details class="admin-user-assign-details mb-3">
+                            <summary class="admin-user-assign-summary">Rol grubu ata</summary>
+                            <p:outputPanel id="groupPickerPanel" layout="block" styleClass="pt-2">
                                 <p:inputText value="#{adminUsersBean.groupPickerSearch}" placeholder="Başlık veya açıklama ara…"
                                              styleClass="form-control mb-2">
                                     <p:ajax event="keyup" delay="350" listener="#{adminUsersBean.refreshGroupPicker}"
@@ -262,7 +263,8 @@
                                     </h:panelGroup>
                                 </div>
                             </p:outputPanel>
-                        </p:fieldset>
+                        </details>
+                        </ui:fragment>
                     </h:panelGroup>
 
                     <div class="admin-dialog-footer d-flex flex-wrap justify-content-end gap-2">

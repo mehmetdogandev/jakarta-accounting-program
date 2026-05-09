@@ -391,20 +391,26 @@
     background: #fafafa;
 }
 
-.admin-user-assign-fieldset.ui-fieldset {
-    border-radius: 0.65rem !important;
-    border: 1px solid var(--admin-page-border) !important;
-    background: #fff !important;
+/* Native <details> — reliable expand/collapse inside dynamic dialogs (no PF Fieldset AJAX) */
+.admin-user-assign-details {
+    border-radius: 0.65rem;
+    border: 1px solid var(--admin-page-border);
+    background: #fff;
+    padding: 0 0.65rem 0.65rem;
 }
 
-.admin-user-assign-fieldset.ui-fieldset .ui-fieldset-legend {
-    font-size: 0.875rem !important;
-    font-weight: 600 !important;
-    color: var(--admin-page-heading) !important;
+.admin-user-assign-summary {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--admin-page-heading);
+    cursor: pointer;
+    list-style: none;
+    padding: 0.55rem 0.15rem 0.35rem;
+    user-select: none;
 }
 
-.admin-user-assign-fieldset.ui-fieldset .ui-fieldset-content {
-    padding: 0.25rem 0.25rem 0.5rem !important;
+.admin-user-assign-summary::-webkit-details-marker {
+    display: none;
 }
 
 .admin-picker-list {
