@@ -19,27 +19,33 @@
                 <h1 class="admin-page-title">Roller</h1>
                 <p class="admin-page-lead">USER, ROLE ve ROLE_GROUP kapsamlarındaki roller tek listede görünür; izin rozetleri satır bazında özetlenir.</p>
 
-                <div class="admin-toolbar">
-                    <div class="admin-toolbar-grow admin-search-wrap">
-                        <span class="admin-search-icon pi pi-search" aria-hidden="true"/>
-                        <p:inputText value="#{adminRolesBean.roleSearch}"
-                                     placeholder="Rol adına göre ara…"
-                                     styleClass="w-100">
-                            <p:ajax event="keyup" delay="300" update="rolesTablePanel"/>
-                        </p:inputText>
+                <div class="admin-list-panel">
+                    <div class="admin-toolbar">
+                        <div class="admin-toolbar-grow admin-search-wrap">
+                            <span class="admin-search-icon pi pi-search" aria-hidden="true"/>
+                            <p:inputText value="#{adminRolesBean.roleSearch}"
+                                         placeholder="Rol adına göre ara…"
+                                         styleClass="w-100">
+                                <p:ajax event="keyup" delay="300" update="rolesTablePanel"/>
+                            </p:inputText>
+                        </div>
+                        <div class="admin-toolbar-actions">
+                            <p:commandButton value="Yeni rol" icon="pi pi-plus" styleClass="admin-btn-primary"
+                                             actionListener="#{adminRolesBean.openNew}"
+                                             update="mainForm"
+                                             rendered="#{rbac.can('ROLE','CREATE')}"
+                                             oncomplete="PF('roleDlg').show()"/>
+                            <p:commandButton id="rolesColToggleBtn" type="button" value="Sütunlar" icon="pi pi-table"
+                                             styleClass="admin-btn-outline"/>
+                            <p:columnToggler datasource="rolesTbl" trigger="rolesColToggleBtn"/>
+                        </div>
                     </div>
-                    <p:commandButton value="Yeni rol" icon="pi pi-plus" styleClass="admin-btn-primary"
-                                     actionListener="#{adminRolesBean.openNew}"
-                                     update="mainForm"
-                                     rendered="#{rbac.can('ROLE','CREATE')}"
-                                     oncomplete="PF('roleDlg').show()"/>
-                </div>
 
-                <p:outputPanel id="rolesTablePanel" layout="block">
+                    <p:outputPanel id="rolesTablePanel" layout="block">
                     <p:dataTable id="rolesTbl" value="#{adminRolesBean.filteredRoles}" var="r"
                                  paginator="true" paginatorPosition="bottom" rows="10" emptyMessage="Kayıt yok"
                                  styleClass="admin-table">
-                        <p:column headerText="Rol">
+                        <p:column headerText="Rol" togglable="true">
                             <div class="admin-role-title">
                                 <h:outputText value="#{r.name}"/>
                             </div>
@@ -47,7 +53,7 @@
                                 <h:outputText value="#{r.scope}"/>
                             </div>
                         </p:column>
-                        <p:column headerText="İzinler">
+                        <p:column headerText="İzinler" togglable="true">
                             <ui:repeat value="#{adminRolesBean.permissionsFor(r)}" var="perm">
                                 <span class="admin-badge"><h:outputText value="#{perm.name()}"/></span>
                             </ui:repeat>
@@ -55,7 +61,7 @@
                                 <span class="text-muted small">—</span>
                             </h:panelGroup>
                         </p:column>
-                        <p:column headerText="İşlemler" style="width:120px">
+                        <p:column headerText="İşlemler" style="width:9rem" togglable="false">
                             <p:commandButton icon="pi pi-pencil" title="Düzenle"
                                              styleClass="admin-btn-icon"
                                              actionListener="#{adminRolesBean.openEdit(r)}"
@@ -71,7 +77,8 @@
                             </p:commandButton>
                         </p:column>
                     </p:dataTable>
-                </p:outputPanel>
+                    </p:outputPanel>
+                </div>
             </div>
 
             <p:confirmDialog global="true" showEffect="fade" hideEffect="fade"/>

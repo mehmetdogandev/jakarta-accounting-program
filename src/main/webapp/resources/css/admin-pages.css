@@ -43,6 +43,27 @@
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 1.15rem;
+    width: 100%;
+    min-width: 0;
+}
+
+.admin-toolbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* Toolbar + table share one column so sağ aksiyonlar tablo sağ kenarı ile hizalı */
+.admin-list-panel {
+    min-width: 0;
+    width: 100%;
+}
+
+.admin-list-panel > .admin-toolbar {
+    margin-bottom: 1rem;
 }
 
 .admin-toolbar-grow {

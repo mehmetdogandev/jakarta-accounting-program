@@ -2,7 +2,8 @@
 
 :root {
     --admin-sidebar-width: 16rem;
-    --admin-app-topbar-height: 3.5rem;
+    /* Sidebar brand + main topbar share one band; room for title + subtitle */
+    --admin-app-topbar-height: clamp(3.75rem, 2.5rem + 2.5vw, 4.5rem);
     --sidebar-background: #fafafa;
     --sidebar-foreground: #334155;
     --sidebar-primary: #0f766e;
@@ -25,6 +26,7 @@
 .admin-root {
     display: flex;
     min-height: 100vh;
+    min-height: 100dvh;
     align-items: stretch;
 }
 
@@ -44,6 +46,7 @@
         max-width: var(--admin-sidebar-width);
         min-width: 0;
         height: 100vh;
+        height: 100dvh;
         top: auto;
         left: auto;
         z-index: auto;
@@ -57,6 +60,7 @@
 
     .admin-offcanvas-sidebar.offcanvas-lg .admin-offcanvas-body {
         height: 100vh;
+        height: 100dvh;
         overflow: hidden;
     }
 
@@ -90,6 +94,8 @@
 
 .admin-sidebar-inner {
     min-height: 100%;
+    min-height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 /* Sidebar header: logo row + collapse (lg+) */
@@ -100,7 +106,7 @@
     justify-content: space-between;
     gap: 0.5rem;
     min-height: var(--admin-app-topbar-height);
-    padding: 0 1rem;
+    padding: 0.35rem 1rem;
     border-bottom: 1px solid var(--sidebar-border);
 }
 
@@ -139,7 +145,8 @@
     font-weight: 600;
     font-size: 0.95rem;
     color: var(--sidebar-accent-foreground);
-    line-height: 1.2;
+    line-height: 1.25;
+    word-break: break-word;
 }
 
 .admin-sb-sub {
@@ -248,6 +255,15 @@
     box-shadow: 0 1px 0 var(--sidebar-border);
 }
 
+/* Mobile strip — same min-height as sidebar header / desktop app topbar */
+.admin-topbar--mobile {
+    min-height: var(--admin-app-topbar-height);
+    padding-top: max(0.5rem, env(safe-area-inset-top, 0));
+    padding-bottom: 0.5rem;
+    padding-left: max(0.75rem, env(safe-area-inset-left, 0));
+    padding-right: max(0.75rem, env(safe-area-inset-right, 0));
+}
+
 .admin-topbar-title {
     font-size: 0.95rem;
     font-weight: 600;
@@ -260,6 +276,7 @@
     min-height: var(--admin-app-topbar-height);
     z-index: 1015;
     box-shadow: 0 1px 0 var(--sidebar-border);
+    padding-top: env(safe-area-inset-top, 0);
 }
 
 .admin-app-topbar-heading {

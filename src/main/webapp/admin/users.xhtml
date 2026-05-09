@@ -19,33 +19,32 @@
                 <h1 class="admin-page-title">Sistem kullanıcıları</h1>
                 <p class="admin-page-lead">Kayıtlı kullanıcıları arayın; yetkiniz varsa yeni kullanıcı oluşturabilir veya mevcut kayıtları düzenleyebilirsiniz.</p>
 
-                <div class="admin-toolbar">
-                    <div class="admin-toolbar-grow admin-search-wrap">
-                        <span class="admin-search-icon pi pi-search" aria-hidden="true"/>
-                        <p:inputText id="userSearchInp" value="#{adminUsersBean.userSearch}"
-                                     placeholder="E-posta veya ad soyad ara…"
-                                     styleClass="w-100">
-                            <p:ajax event="keyup" delay="300" update="usersTablePanel"/>
-                        </p:inputText>
+                <div class="admin-list-panel">
+                    <div class="admin-toolbar">
+                        <div class="admin-toolbar-grow admin-search-wrap">
+                            <span class="admin-search-icon pi pi-search" aria-hidden="true"/>
+                            <p:inputText id="userSearchInp" value="#{adminUsersBean.userSearch}"
+                                         placeholder="E-posta veya ad soyad ara…"
+                                         styleClass="w-100">
+                                <p:ajax event="keyup" delay="300" update="usersTablePanel"/>
+                            </p:inputText>
+                        </div>
+                        <div class="admin-toolbar-actions">
+                            <p:commandButton value="Yeni kullanıcı" icon="pi pi-plus" styleClass="admin-btn-primary"
+                                             actionListener="#{adminUsersBean.openNew}"
+                                             update="mainForm"
+                                             rendered="#{rbac.can('USER','CREATE')}"
+                                             oncomplete="PF('userMgmtDlg').show()"/>
+                            <p:commandButton id="usersColToggleBtn" type="button" value="Sütunlar" icon="pi pi-table"
+                                             styleClass="admin-btn-outline"/>
+                            <p:columnToggler datasource="usersTbl" trigger="usersColToggleBtn"/>
+                        </div>
                     </div>
-                    <p:commandButton value="Yeni kullanıcı" icon="pi pi-plus" styleClass="admin-btn-primary"
-                                     actionListener="#{adminUsersBean.openNew}"
-                                     update="mainForm"
-                                     rendered="#{rbac.can('USER','CREATE')}"
-                                     oncomplete="PF('userDlg').show()"/>
-                </div>
 
-                <p:outputPanel id="usersTablePanel" layout="block">
+                    <p:outputPanel id="usersTablePanel" layout="block">
                     <p:dataTable id="usersTbl" value="#{adminUsersBean.filteredUsers}" var="u"
                                  paginator="true" paginatorPosition="bottom" rows="10" emptyMessage="Kayıt yok"
                                  styleClass="admin-table">
-                        <f:facet name="header">
-                            <div class="d-flex justify-content-end pb-1">
-                                <p:commandButton id="colToggleBtn" type="button" value="Sütunlar" icon="pi pi-table"
-                                                 styleClass="admin-btn-outline"/>
-                                <p:columnToggler datasource="usersTbl" trigger="colToggleBtn"/>
-                            </div>
-                        </f:facet>
                         <p:column headerText="Kullanıcı" togglable="false">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="admin-avatar"><h:outputText value="#{adminUi.initials(u)}"/></span>
@@ -65,13 +64,19 @@
                         <p:column headerText="Kayıt tarihi" togglable="true">
                             <h:outputText value="#{adminUi.formatShortDate(u.createdAt)}"/>
                         </p:column>
-                        <p:column headerText="İşlemler" style="width:120px" togglable="false">
-                            <p:commandButton icon="pi pi-pencil" title="Düzenle"
+                        <p:column headerText="İşlemler" style="width:9rem" togglable="false">
+                            <p:commandButton icon="pi pi-eye" title="Detay"
                                              styleClass="admin-btn-icon"
+                                             actionListener="#{adminUsersBean.openDetail(u)}"
+                                             update="mainForm"
+                                             rendered="#{rbac.can('USER','READ')}"
+                                             oncomplete="PF('userMgmtDlg').show()"/>
+                            <p:commandButton icon="pi pi-pencil" title="Düzenle"
+                                             styleClass="admin-btn-icon ms-1"
                                              actionListener="#{adminUsersBean.openEdit(u)}"
                                              update="mainForm"
                                              rendered="#{rbac.can('USER','UPDATE')}"
-                                             oncomplete="PF('userDlg').show()"/>
+                                             oncomplete="PF('userMgmtDlg').show()"/>
                             <p:commandButton icon="pi pi-trash" title="Sil"
                                              styleClass="admin-btn-icon admin-btn-danger-icon ms-1"
                                              actionListener="#{adminUsersBean.softDelete(u)}"
@@ -81,34 +86,191 @@
                             </p:commandButton>
                         </p:column>
                     </p:dataTable>
-                </p:outputPanel>
+                    </p:outputPanel>
+                </div>
             </div>
 
             <p:confirmDialog global="true" showEffect="fade" hideEffect="fade"/>
 
-            <p:dialog id="userDlg" header="Kullanıcı" widgetVar="userDlg" modal="true" appendTo="@body"
-                      dynamic="true" width="480" styleClass="admin-dialog">
-                <h:panelGroup rendered="#{adminUsersBean.editUser != null}">
+            <p:dialog id="userMgmtDlg" header="#{adminUsersBean.managementDialogTitle}" widgetVar="userMgmtDlg" modal="true"
+                      appendTo="@body" dynamic="true" responsive="true"
+                      styleClass="admin-dialog admin-user-mgmt-dialog"
+                      style="max-width: min(92vw, 720px); width: 100%;">
+                <h:panelGroup id="userMgmtBody" layout="block" rendered="#{adminUsersBean.editUser != null}">
+                    <div class="admin-user-mgmt-header d-flex gap-3 align-items-start mb-3">
+                        <span class="admin-avatar admin-avatar-lg"><h:outputText value="#{adminUi.initials(adminUsersBean.editUser)}"/></span>
+                        <div class="min-w-0 flex-grow-1">
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                <h2 class="h5 mb-0 text-truncate">
+                                    <h:outputText value="#{adminUsersBean.editUser.name} #{adminUsersBean.editUser.surname}"/>
+                                </h2>
+                                <span class="badge rounded-pill text-bg-secondary admin-user-mode-badge">
+                                    <h:outputText value="#{adminUsersBean.managementModeLabel}"/>
+                                </span>
+                            </div>
+                            <div class="text-muted small text-break">
+                                <h:outputText value="#{adminUsersBean.editUser.email}"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="h6 text-uppercase text-muted small mb-2">Profil</h3>
                     <div class="mb-2">
                         <label class="form-label">E-posta</label>
-                        <p:inputText value="#{adminUsersBean.editUser.email}" styleClass="form-control w-100"/>
+                        <p:inputText value="#{adminUsersBean.editUser.email}" styleClass="form-control w-100"
+                                     disabled="#{not adminUsersBean.profileEditable}"/>
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label">Şifre</label>
-                        <p:password value="#{adminUsersBean.editUser.password}" styleClass="form-control w-100" redisplay="true"/>
-                    </div>
+                    <h:panelGroup rendered="#{adminUsersBean.profileEditable}">
+                        <div class="mb-2">
+                            <label class="form-label">Şifre</label>
+                            <p:password value="#{adminUsersBean.editUser.password}" styleClass="form-control w-100" redisplay="true"/>
+                        </div>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{adminUsersBean.detailMode}">
+                        <div class="mb-2 text-muted small">Şifre bu görünümde gösterilmez.</div>
+                    </h:panelGroup>
                     <div class="mb-2">
                         <label class="form-label">Ad</label>
-                        <p:inputText value="#{adminUsersBean.editUser.name}" styleClass="form-control w-100"/>
+                        <p:inputText value="#{adminUsersBean.editUser.name}" styleClass="form-control w-100"
+                                     disabled="#{not adminUsersBean.profileEditable}"/>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Soyad</label>
-                        <p:inputText value="#{adminUsersBean.editUser.surname}" styleClass="form-control w-100"/>
+                        <p:inputText value="#{adminUsersBean.editUser.surname}" styleClass="form-control w-100"
+                                     disabled="#{not adminUsersBean.profileEditable}"/>
                     </div>
-                    <p:commandButton value="Kaydet" icon="pi pi-check" action="#{adminUsersBean.save}"
-                                     update="mainForm" process="@form"/>
-                    <p:commandButton value="İptal" icon="pi pi-times" type="button" styleClass="ui-button-secondary ms-2"
-                                     onclick="PF('userDlg').hide()"/>
+
+                    <h:panelGroup id="assignedBlocks" layout="block" rendered="#{adminUsersBean.editUser.id != null}">
+                        <h3 class="h6 text-uppercase text-muted small mb-2">Atanan roller</h3>
+                        <div class="admin-user-assign-section mb-3">
+                            <ui:repeat value="#{adminUsersBean.assignedRoles}" var="ar">
+                                <span class="admin-chip d-inline-flex align-items-center gap-1 me-1 mb-1">
+                                    <span class="admin-badge"><h:outputText value="#{ar.name}"/></span>
+                                    <span class="text-muted small">(<h:outputText value="#{ar.scope}"/>)</span>
+                                    <p:commandButton icon="pi pi-times" title="Kaldır"
+                                                     styleClass="admin-btn-icon admin-chip-remove p-0"
+                                                     actionListener="#{adminUsersBean.removeAssignedRole(ar)}"
+                                                     update="mainForm:assignedBlocks mainForm:rolePickerPanel mainForm:msgs"
+                                                     rendered="#{adminUsersBean.canManageAssignments() and rbac.can('ROLE','READ')}"/>
+                                </span>
+                            </ui:repeat>
+                            <h:panelGroup rendered="#{empty adminUsersBean.assignedRoles}">
+                                <span class="text-muted small">Atanmış rol yok.</span>
+                            </h:panelGroup>
+                        </div>
+
+                        <h3 class="h6 text-uppercase text-muted small mb-2">Atanan rol grupları</h3>
+                        <div class="admin-user-assign-section mb-3">
+                            <ui:repeat value="#{adminUsersBean.assignedRoleGroups}" var="ag">
+                                <span class="admin-chip d-inline-flex align-items-center gap-1 me-1 mb-1">
+                                    <span class="admin-badge"><h:outputText value="#{ag.title}"/></span>
+                                    <p:commandButton icon="pi pi-times" title="Kaldır"
+                                                     styleClass="admin-btn-icon admin-chip-remove p-0"
+                                                     actionListener="#{adminUsersBean.removeAssignedRoleGroup(ag)}"
+                                                     update="mainForm:assignedBlocks mainForm:groupPickerPanel mainForm:msgs"
+                                                     rendered="#{adminUsersBean.canManageAssignments() and rbac.can('ROLE_GROUP','READ')}"/>
+                                </span>
+                            </ui:repeat>
+                            <h:panelGroup rendered="#{empty adminUsersBean.assignedRoleGroups}">
+                                <span class="text-muted small">Atanmış rol grubu yok.</span>
+                            </h:panelGroup>
+                        </div>
+
+                        <p:accordionPanel id="assignAccordion" multiple="false" styleClass="admin-user-assign-accordion"
+                                          rendered="#{adminUsersBean.canManageAssignments()}">
+                            <p:tab title="Rol ata">
+                                <p:outputPanel id="rolePickerPanel" layout="block">
+                                    <p:inputText value="#{adminUsersBean.rolePickerSearch}" placeholder="Rol adı ara…"
+                                                 styleClass="form-control mb-2">
+                                        <p:ajax event="keyup" delay="350" listener="#{adminUsersBean.refreshRolePicker}"
+                                                update="rolePickerPanel msgs"/>
+                                    </p:inputText>
+                                    <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
+                                        <h:outputText value="#{adminUsersBean.pickerRolesPageStart}–#{adminUsersBean.pickerRolesPageEnd} / #{adminUsersBean.pickerRolesCount}"/>
+                                        <div class="btn-group btn-group-sm">
+                                            <p:commandButton icon="pi pi-angle-left" styleClass="ui-button-secondary"
+                                                             actionListener="#{adminUsersBean.pickerRolesPrev}"
+                                                             disabled="#{not adminUsersBean.pickerRolesHasPrev}"
+                                                             update="rolePickerPanel"/>
+                                            <p:commandButton icon="pi pi-angle-right" styleClass="ui-button-secondary"
+                                                             actionListener="#{adminUsersBean.pickerRolesNext}"
+                                                             disabled="#{not adminUsersBean.pickerRolesHasNext}"
+                                                             update="rolePickerPanel"/>
+                                        </div>
+                                    </div>
+                                    <div class="admin-picker-list">
+                                        <ui:repeat value="#{adminUsersBean.pickerRoles}" var="pr">
+                                            <div class="d-flex justify-content-between align-items-center py-1 border-bottom border-light">
+                                                <div>
+                                                    <strong><h:outputText value="#{pr.name}"/></strong>
+                                                    <span class="text-muted small ms-1">(<h:outputText value="#{pr.scope}"/>)</span>
+                                                </div>
+                                                <p:commandButton value="Ekle" icon="pi pi-plus"
+                                                                 styleClass="admin-btn-outline btn-sm"
+                                                                 actionListener="#{adminUsersBean.assignPickerRole(pr)}"
+                                                                 update="mainForm:assignedBlocks mainForm:rolePickerPanel mainForm:msgs"
+                                                                 rendered="#{rbac.can('ROLE','READ')}"/>
+                                            </div>
+                                        </ui:repeat>
+                                        <h:panelGroup rendered="#{empty adminUsersBean.pickerRoles}">
+                                            <span class="text-muted small">Sonuç yok veya tüm roller atanmış.</span>
+                                        </h:panelGroup>
+                                    </div>
+                                </p:outputPanel>
+                            </p:tab>
+                            <p:tab title="Rol grubu ata">
+                                <p:outputPanel id="groupPickerPanel" layout="block">
+                                    <p:inputText value="#{adminUsersBean.groupPickerSearch}" placeholder="Başlık veya açıklama ara…"
+                                                 styleClass="form-control mb-2">
+                                        <p:ajax event="keyup" delay="350" listener="#{adminUsersBean.refreshGroupPicker}"
+                                                update="groupPickerPanel msgs"/>
+                                    </p:inputText>
+                                    <div class="d-flex justify-content-between align-items-center small text-muted mb-2">
+                                        <h:outputText value="#{adminUsersBean.pickerGroupsPageStart}–#{adminUsersBean.pickerGroupsPageEnd} / #{adminUsersBean.pickerRoleGroupsCount}"/>
+                                        <div class="btn-group btn-group-sm">
+                                            <p:commandButton icon="pi pi-angle-left" styleClass="ui-button-secondary"
+                                                             actionListener="#{adminUsersBean.pickerGroupsPrev}"
+                                                             disabled="#{not adminUsersBean.pickerGroupsHasPrev}"
+                                                             update="groupPickerPanel"/>
+                                            <p:commandButton icon="pi pi-angle-right" styleClass="ui-button-secondary"
+                                                             actionListener="#{adminUsersBean.pickerGroupsNext}"
+                                                             disabled="#{not adminUsersBean.pickerGroupsHasNext}"
+                                                             update="groupPickerPanel"/>
+                                        </div>
+                                    </div>
+                                    <div class="admin-picker-list">
+                                        <ui:repeat value="#{adminUsersBean.pickerRoleGroups}" var="pg">
+                                            <div class="d-flex justify-content-between align-items-center py-1 border-bottom border-light">
+                                                <div>
+                                                    <strong><h:outputText value="#{pg.title}"/></strong>
+                                                    <div class="text-muted small text-truncate" style="max-width:14rem;">
+                                                        <h:outputText value="#{pg.description}"/>
+                                                    </div>
+                                                </div>
+                                                <p:commandButton value="Ekle" icon="pi pi-plus"
+                                                                 styleClass="admin-btn-outline btn-sm"
+                                                                 actionListener="#{adminUsersBean.assignPickerRoleGroup(pg)}"
+                                                                 update="mainForm:assignedBlocks mainForm:groupPickerPanel mainForm:msgs"
+                                                                 rendered="#{rbac.can('ROLE_GROUP','READ')}"/>
+                                            </div>
+                                        </ui:repeat>
+                                        <h:panelGroup rendered="#{empty adminUsersBean.pickerRoleGroups}">
+                                            <span class="text-muted small">Sonuç yok veya tüm gruplar atanmış.</span>
+                                        </h:panelGroup>
+                                    </div>
+                                </p:outputPanel>
+                            </p:tab>
+                        </p:accordionPanel>
+                    </h:panelGroup>
+
+                    <div class="d-flex flex-wrap gap-2 mt-3 pt-2 border-top">
+                        <p:commandButton value="Kaydet" icon="pi pi-check" styleClass="admin-btn-primary"
+                                         action="#{adminUsersBean.save}"
+                                         update="mainForm" process="@form"
+                                         rendered="#{adminUsersBean.profileEditable}"/>
+                        <p:commandButton value="Kapat" icon="pi pi-times" type="button" styleClass="ui-button-secondary"
+                                         onclick="PF('userMgmtDlg').hide()"/>
+                    </div>
                 </h:panelGroup>
             </p:dialog>
         </h:form>
