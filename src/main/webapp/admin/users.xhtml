@@ -24,9 +24,6 @@
                             <p:ajax event="keyup" delay="300" update="usersTablePanel"/>
                         </p:inputText>
                     </div>
-                    <p:commandButton id="colToggleBtn" type="button" value="Sütunlar" icon="pi pi-table"
-                                     styleClass="admin-btn-outline"/>
-                    <p:columnToggler datasource="usersTablePanel:usersTbl" trigger="colToggleBtn"/>
                     <p:commandButton value="Yeni kullanıcı" icon="pi pi-plus" styleClass="admin-btn-primary"
                                      actionListener="#{adminUsersBean.openNew}"
                                      update="mainForm"
@@ -38,6 +35,13 @@
                     <p:dataTable id="usersTbl" value="#{adminUsersBean.filteredUsers}" var="u"
                                  paginator="true" rows="10" emptyMessage="Kayıt yok"
                                  styleClass="admin-table">
+                        <f:facet name="header">
+                            <div class="d-flex justify-content-end pb-1">
+                                <p:commandButton id="colToggleBtn" type="button" value="Sütunlar" icon="pi pi-table"
+                                                 styleClass="admin-btn-outline"/>
+                                <p:columnToggler datasource="usersTbl" trigger="colToggleBtn"/>
+                            </div>
+                        </f:facet>
                         <p:column headerText="Kullanıcı" togglable="false">
                             <div class="d-flex align-items-center gap-2">
                                 <span class="admin-avatar"><h:outputText value="#{adminUi.initials(u)}"/></span>

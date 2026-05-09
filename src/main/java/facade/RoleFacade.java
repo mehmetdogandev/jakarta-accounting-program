@@ -15,12 +15,29 @@ import java.util.UUID;
 public class RoleFacade extends AbstractFacade implements RoleFacadeLocal {
 
     @Override
+    @SuppressWarnings("unchecked")
     public List<Role> listByScope(Scope scope) {
-        return entityManager.createQuery(
-                        "SELECT r FROM Role r WHERE r.scope = :s AND r.deletedAt IS NULL ORDER BY r.name",
-                        Role.class)
-                .setParameter("s", scope)
+        /*
+         * PostgreSQL column role.scope is native enum app_scope. EclipseLink binds JPQL enum params as
+         * varchar, which fails (operator does not exist: app_scope = character varying). Resolve IDs with
+         * a native cast, then load entities by primary key (no enum bind in WHERE).
+         */
+        List<?> rawIds = entityManager.createNativeQuery(
+                        "SELECT id FROM role WHERE scope = CAST(?1 AS app_scope) AND deleted_at IS NULL ORDER BY name")
+                .setParameter(1, scope.name())
                 .getResultList();
+        if (rawIds.isEmpty()) {
+            return List.of();
+        }
+        List<UUID> ids = new ArrayList<>(rawIds.size());
+        for (Object row : rawIds) {
+            ids.add(row instanceof UUID u ? u : UUID.fromString(row.toString()));
+        }
+        List<Role> loaded = entityManager.createQuery(
+                        "SELECT r FROM Role r WHERE r.id IN :ids ORDER BY r.name", Role.class)
+                .setParameter("ids", ids)
+                .getResultList();
+        return loaded;
     }
 
     @Override
