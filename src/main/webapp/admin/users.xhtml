@@ -94,7 +94,7 @@
 
             <p:dialog id="userMgmtDlg" header="#{adminUsersBean.managementDialogTitle}" widgetVar="userMgmtDlg" modal="true"
                       appendTo="@body" dynamic="true" responsive="true"
-                      styleClass="admin-dialog admin-user-mgmt-dialog"
+                      styleClass="admin-dialog admin-user-mgmt-dialog #{adminUsersBean.detailMode ? 'admin-dialog-detail' : ''}"
                       style="max-width: min(92vw, 720px); width: 100%;">
                 <h:panelGroup id="userMgmtBody" layout="block" rendered="#{adminUsersBean.editUser != null}">
                     <div class="admin-user-mgmt-header d-flex gap-3 align-items-start mb-3">
@@ -114,35 +114,39 @@
                         </div>
                     </div>
 
-                    <h3 class="h6 text-uppercase text-muted small mb-2">Profil</h3>
-                    <div class="mb-2">
-                        <label class="form-label">E-posta</label>
-                        <p:inputText value="#{adminUsersBean.editUser.email}" styleClass="form-control w-100"
-                                     disabled="#{not adminUsersBean.profileEditable}"/>
-                    </div>
-                    <h:panelGroup rendered="#{adminUsersBean.profileEditable}">
-                        <div class="mb-2">
-                            <label class="form-label">Şifre</label>
-                            <p:password value="#{adminUsersBean.editUser.password}" styleClass="form-control w-100" redisplay="true"/>
+                    <div class="admin-dialog-kv-stack">
+                        <h3 class="admin-dialog-kv-heading">Profil</h3>
+                        <div class="admin-dialog-kv">
+                            <label class="admin-dialog-kv-label" for="mainForm:userEmailInp">E-posta</label>
+                            <p:inputText id="userEmailInp" value="#{adminUsersBean.editUser.email}" styleClass="form-control w-100 admin-dialog-input"
+                                         disabled="#{not adminUsersBean.profileEditable}"/>
                         </div>
-                    </h:panelGroup>
-                    <h:panelGroup rendered="#{adminUsersBean.detailMode}">
-                        <div class="mb-2 text-muted small">Şifre bu görünümde gösterilmez.</div>
-                    </h:panelGroup>
-                    <div class="mb-2">
-                        <label class="form-label">Ad</label>
-                        <p:inputText value="#{adminUsersBean.editUser.name}" styleClass="form-control w-100"
-                                     disabled="#{not adminUsersBean.profileEditable}"/>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Soyad</label>
-                        <p:inputText value="#{adminUsersBean.editUser.surname}" styleClass="form-control w-100"
-                                     disabled="#{not adminUsersBean.profileEditable}"/>
+                        <h:panelGroup rendered="#{adminUsersBean.profileEditable}">
+                            <div class="admin-dialog-kv">
+                                <label class="admin-dialog-kv-label" for="mainForm:userPwdInp">Şifre</label>
+                                <p:password id="userPwdInp" value="#{adminUsersBean.editUser.password}" styleClass="form-control w-100 admin-dialog-input" redisplay="true"/>
+                            </div>
+                        </h:panelGroup>
+                        <h:panelGroup rendered="#{adminUsersBean.detailMode}">
+                            <div class="admin-dialog-kv admin-dialog-kv--note">
+                                <p class="admin-dialog-kv-value admin-dialog-kv-value--muted mb-0 small">Şifre bu görünümde gösterilmez.</p>
+                            </div>
+                        </h:panelGroup>
+                        <div class="admin-dialog-kv">
+                            <label class="admin-dialog-kv-label" for="mainForm:userNameInp">Ad</label>
+                            <p:inputText id="userNameInp" value="#{adminUsersBean.editUser.name}" styleClass="form-control w-100 admin-dialog-input"
+                                         disabled="#{not adminUsersBean.profileEditable}"/>
+                        </div>
+                        <div class="admin-dialog-kv">
+                            <label class="admin-dialog-kv-label" for="mainForm:userSurnameInp">Soyad</label>
+                            <p:inputText id="userSurnameInp" value="#{adminUsersBean.editUser.surname}" styleClass="form-control w-100 admin-dialog-input"
+                                         disabled="#{not adminUsersBean.profileEditable}"/>
+                        </div>
                     </div>
 
                     <h:panelGroup id="assignedBlocks" layout="block" rendered="#{adminUsersBean.editUser.id != null}">
-                        <h3 class="h6 text-uppercase text-muted small mb-2">Atanan roller</h3>
-                        <div class="admin-user-assign-section mb-3">
+                        <h3 class="admin-dialog-kv-heading mt-1">Atanan roller</h3>
+                        <div class="admin-user-assign-section admin-dialog-chip-panel mb-3">
                             <ui:repeat value="#{adminUsersBean.assignedRoles}" var="ar">
                                 <span class="admin-chip d-inline-flex align-items-center gap-1 me-1 mb-1">
                                     <span class="admin-badge"><h:outputText value="#{ar.name}"/></span>
@@ -159,8 +163,8 @@
                             </h:panelGroup>
                         </div>
 
-                        <h3 class="h6 text-uppercase text-muted small mb-2">Atanan rol grupları</h3>
-                        <div class="admin-user-assign-section mb-3">
+                        <h3 class="admin-dialog-kv-heading">Atanan rol grupları</h3>
+                        <div class="admin-user-assign-section admin-dialog-chip-panel mb-3">
                             <ui:repeat value="#{adminUsersBean.assignedRoleGroups}" var="ag">
                                 <span class="admin-chip d-inline-flex align-items-center gap-1 me-1 mb-1">
                                     <span class="admin-badge"><h:outputText value="#{ag.title}"/></span>

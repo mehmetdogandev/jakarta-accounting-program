@@ -90,55 +90,65 @@
             <p:confirmDialog global="true" showEffect="fade" hideEffect="fade"/>
 
             <p:dialog id="roleDetailDlg" header="Rol detayı" widgetVar="roleDetailDlg" modal="true" appendTo="@body"
-                      dynamic="true" styleClass="admin-dialog" style="max-width: min(92vw, 520px); width: 100%;">
+                      dynamic="true" styleClass="admin-dialog admin-dialog-detail"
+                      style="max-width: min(92vw, 520px); width: 100%;">
                 <h:panelGroup rendered="#{adminRolesBean.detailRole != null}">
-                    <div class="mb-2">
-                        <div class="text-muted small text-uppercase">Ad</div>
-                        <div class="fw-semibold"><h:outputText value="#{adminRolesBean.detailRole.name}"/></div>
+                    <div class="admin-dialog-hero">
+                        <h2 class="admin-dialog-hero-title">
+                            <h:outputText value="#{adminRolesBean.detailRole.name}"/>
+                        </h2>
+                        <div class="admin-dialog-hero-meta">
+                            <span class="admin-dialog-badge-scope"><h:outputText value="#{adminRolesBean.detailRole.scope}"/></span>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <div class="text-muted small text-uppercase">Kapsam</div>
-                        <div><h:outputText value="#{adminRolesBean.detailRole.scope}"/></div>
+                    <div class="admin-dialog-kv">
+                        <div class="admin-dialog-kv-label">İzinler</div>
+                        <div class="admin-dialog-chip-panel">
+                            <ui:repeat value="#{adminRolesBean.detailPermissions}" var="dp">
+                                <span class="admin-badge me-1 mb-1 d-inline-block"><h:outputText value="#{dp.name()}"/></span>
+                            </ui:repeat>
+                            <h:panelGroup rendered="#{empty adminRolesBean.detailPermissions}">
+                                <span class="admin-dialog-empty-hint">İzin tanımlı değil.</span>
+                            </h:panelGroup>
+                        </div>
                     </div>
-                    <div class="text-muted small text-uppercase mb-2">İzinler</div>
-                    <div class="admin-user-assign-section">
-                        <ui:repeat value="#{adminRolesBean.detailPermissions}" var="dp">
-                            <span class="admin-badge me-1 mb-1 d-inline-block"><h:outputText value="#{dp.name()}"/></span>
-                        </ui:repeat>
-                        <h:panelGroup rendered="#{empty adminRolesBean.detailPermissions}">
-                            <span class="text-muted small">İzin tanımlı değil.</span>
-                        </h:panelGroup>
+                    <div class="admin-dialog-detail-footer">
+                        <p:commandButton value="Kapat" icon="pi pi-times" type="button" styleClass="ui-button-secondary"
+                                         onclick="PF('roleDetailDlg').hide()"/>
                     </div>
-                    <p:commandButton value="Kapat" type="button" styleClass="ui-button-secondary mt-3"
-                                     onclick="PF('roleDetailDlg').hide()"/>
                 </h:panelGroup>
             </p:dialog>
 
             <p:dialog id="roleDlg" header="Rol" widgetVar="roleDlg" modal="true" appendTo="@body" dynamic="true"
-                      width="540" styleClass="admin-dialog">
+                      width="540" styleClass="admin-dialog admin-dialog-form">
                 <h:panelGroup rendered="#{adminRolesBean.editRole != null}">
-                    <div class="mb-2">
-                        <label class="form-label">Ad</label>
-                        <p:inputText value="#{adminRolesBean.editRole.name}" styleClass="form-control w-100"/>
+                    <div class="admin-dialog-kv-stack">
+                        <div class="admin-dialog-kv">
+                            <label class="admin-dialog-kv-label" for="mainForm:roleNameInp">Ad</label>
+                            <p:inputText id="roleNameInp" value="#{adminRolesBean.editRole.name}" styleClass="form-control w-100 admin-dialog-input"/>
+                        </div>
+                        <div class="admin-dialog-kv">
+                            <label class="admin-dialog-kv-label">Kapsam</label>
+                            <p:selectOneMenu value="#{adminRolesBean.editRole.scope}" styleClass="w-100 admin-dialog-select">
+                                <f:selectItems value="#{adminRolesBean.scopeOptions}" var="sc"
+                                               itemValue="#{sc}" itemLabel="#{sc.name()}"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="admin-dialog-kv admin-dialog-kv--flush">
+                            <label class="admin-dialog-kv-label">İzinler</label>
+                            <p:selectManyCheckbox id="perms" value="#{adminRolesBean.selectedPermissions}" layout="grid" columns="3"
+                                                  styleClass="admin-dialog-perm-grid">
+                                <f:selectItems value="#{adminRolesBean.permissionOptions}" var="perm"
+                                               itemValue="#{perm}" itemLabel="#{perm.name()}"/>
+                            </p:selectManyCheckbox>
+                        </div>
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label">Kapsam</label>
-                        <p:selectOneMenu value="#{adminRolesBean.editRole.scope}" styleClass="w-100">
-                            <f:selectItems value="#{adminRolesBean.scopeOptions}" var="sc"
-                                           itemValue="#{sc}" itemLabel="#{sc.name()}"/>
-                        </p:selectOneMenu>
+                    <div class="admin-dialog-footer d-flex flex-wrap justify-content-end gap-2">
+                        <p:commandButton value="Kaydet" icon="pi pi-check" action="#{adminRolesBean.save}"
+                                         update="mainForm" process="@form" styleClass="admin-btn-primary"/>
+                        <p:commandButton value="İptal" icon="pi pi-times" type="button" styleClass="ui-button-secondary"
+                                         onclick="PF('roleDlg').hide()"/>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">İzinler</label>
-                        <p:selectManyCheckbox id="perms" value="#{adminRolesBean.selectedPermissions}" layout="grid" columns="3">
-                            <f:selectItems value="#{adminRolesBean.permissionOptions}" var="perm"
-                                           itemValue="#{perm}" itemLabel="#{perm.name()}"/>
-                        </p:selectManyCheckbox>
-                    </div>
-                    <p:commandButton value="Kaydet" icon="pi pi-check" action="#{adminRolesBean.save}"
-                                     update="mainForm" process="@form"/>
-                    <p:commandButton value="İptal" icon="pi pi-times" type="button" styleClass="ui-button-secondary ms-2"
-                                     onclick="PF('roleDlg').hide()"/>
                 </h:panelGroup>
             </p:dialog>
         </h:form>
