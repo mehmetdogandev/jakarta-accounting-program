@@ -25,14 +25,49 @@ Jakarta EE 11 tabanlı bir **muhasebe / yönetim** iskeleti: **JSF (Facelets)** 
 |------|-----|
 | **JDK** | 17+ ([`pom.xml`](pom.xml) `maven.compiler.release`) |
 | **Maven** | 3.9+ önerilir |
-| **Docker** | Postgres + Flyway (ve isteğe bağlı tam stack) |
-| **Payara Server 7** | Yerel geliştirme için (Jakarta EE 11 uyumlu sürüm) |
+| **Docker** | Varsayılan geliştirme: DB + uygulama konteynerde |
+| **Payara Server 7** | İsteğe bağlı: yalnızca DB Docker’da, WAR’ı IDE’den çalıştırırken |
 
 ---
 
-## Geliştirici ortamı (önerilen): DB Docker’da, uygulama yerelde
+## Hızlı başlat (`pnpm run dev` / Next.js benzeri tek komut)
 
-Bu akışta yalnızca **PostgreSQL** ve **Flyway** konteynerde çalışır; **Payara’yı IDE veya yerel kurulumda** çalıştırırsınız.
+Bu proje **Node değil**; yine de **tek komutla** Postgres + migrasyon + Payara’yı ayağa kaldırmak için:
+
+```bash
+cp .env.example .env   # ilk sefer
+pnpm dev               # veya: npm run dev
+```
+
+Eşdeğer (Compose doğrudan):
+
+```bash
+docker compose up --build -d
+```
+
+- İlk build biraz sürebilir (Payara imajı + Maven).
+- Tarayıcı: **`http://localhost:8080/login.xhtml`** ([`Dockerfile`](Dockerfile) `ROOT.war` kullandığı için genelde kök context).
+
+**Önemli:** Next.js’teki gibi **anında HMR yok**. Java/XHTML değişince genelde yeniden:
+
+```bash
+pnpm dev
+```
+
+(yeniden build + konteyner güncellemesi) veya sadece `docker compose up --build -d`.
+
+**Sadece veritabanı** (yerel Payara + IDE deploy kullanacaksan):
+
+```bash
+pnpm dev:db
+# veya: docker compose -f docker-compose.dev.yaml up -d
+```
+
+---
+
+## Geliştirici ortamı (alternatif): DB Docker’da, uygulama yerelde
+
+Payara’yı **bilgisayarında** çalıştırıp yalnızca PostgreSQL’i Docker’da istiyorsan:
 
 ### 1. Ortam dosyası
 
@@ -40,25 +75,11 @@ Bu akışta yalnızca **PostgreSQL** ve **Flyway** konteynerde çalışır; **Pa
 cp .env.example .env
 ```
 
-`.env` içindeki `MODE` ve `COMPOSE_PROFILES` değerleri **bilgilendirme / Compose profili** içindir (MODE tek başına Compose’u otomatik değiştirmez).
-
-### 2. Veritabanı ve migrasyonları kaldırma
-
-Proje kökünde:
-
-```bash
-docker compose up -d
-```
-
-[`docker-compose.yaml`](docker-compose.yaml) içinde **`app` servisi yalnızca `production` profilindedir**; profil vermeden çalıştırdığınızda **postgres** ve **flyway** ayakta olur, uygulama konteyneri **başlamaz**.
-
-Eşdeğer alternatif:
+### 2. Yalnızca Postgres + Flyway
 
 ```bash
 docker compose -f docker-compose.dev.yaml up -d
 ```
-
-Flyway bir kez migrasyonları uygular ve çıkar (`restart: "no"`). Postgres sürekli çalışır.
 
 ### 3. PostgreSQL bağlantı bilgisi
 
@@ -121,7 +142,7 @@ mvn clean package -DskipTests
 
 Bu WAR dosyasını Payara’ya deploy edin (IDE artefact, `autodeploy` klasörü veya Admin Console **Applications**).
 
-**Context path:** Yerelde genelde uygulama adıyla deploy edilir (`http://localhost:8080/accounting/...`). Docker production imajında [`Dockerfile`](Dockerfile) **`ROOT.war`** kullandığı için kök context (`/`) olabilir. Giriş URL’sini kendi deploy adınıza göre uyarlayın:
+**Context path:** Yerelde genelde uygulama adıyla deploy edilir (`http://localhost:8080/accounting/...`). Docker tam stack’te [`Dockerfile`](Dockerfile) **`ROOT.war`** kullandığı için kök context (`/`) olabilir. Giriş URL’sini kendi deploy adınıza göre uyarlayın:
 
 - Örnek: `http://localhost:8080/accounting/login.xhtml`
 
@@ -138,28 +159,17 @@ Ek olarak [`V2__admin_scope_roles.sql`](src/main/resources/db/migration/V2__admi
 
 ---
 
-## Production / tam stack Docker
+## Docker ile tam stack (varsayılan `pnpm dev`)
 
-Uygulama konteynerinin de kalkması için **Compose production profili** gerekir:
+[`docker-compose.yaml`](docker-compose.yaml) dosyasında **postgres**, **flyway** ve **app** (Payara) birlikte tanımlıdır. `pnpm dev` veya `docker compose up --build -d` sonrası:
 
-```bash
-export COMPOSE_PROFILES=production
-docker compose up --build
-```
-
-veya tek satır:
-
-```bash
-docker compose --profile production up --build
-```
-
-- Payara konteyneri Flyway başarıyla bittikten sonra başlar.
-- DB bağlantısı Docker ağında **`postgres:5432`** üzerinden yapılandırılır ([`docker/payara-entrypoint.sh`](docker/payara-entrypoint.sh)).
-- HTTP portu: `.env` içinde `APP_HTTP_PORT` (varsayılan `8080`).
+- Flyway migrasyonları uygulanır.
+- Payara konteyneri DB’ye Docker ağından **`postgres:5432`** ile bağlanır ([`docker/payara-entrypoint.sh`](docker/payara-entrypoint.sh) ile `jdbc/testPSQL`).
+- HTTP: `.env` içindeki `APP_HTTP_PORT` (varsayılan **8080**).
 
 ---
 
-## Önemli URL’ler (context köküne göre önekleyin)
+## Önemli URL’ler (Docker ROOT deploy)
 
 | Sayfa | Path |
 |--------|------|
@@ -195,7 +205,7 @@ docker compose down -v
 | Flyway hata verdi | Logları kontrol edin; şema değiştiyse volume sıfırlama veya onarıcı migration gerekebilir. |
 | IDE: “pom güncel değil” | Maven projesini yeniden yükle / **Reload Window** / Java Language Server yenilemesi. |
 | `jdbc/testPSQL` bulunamadı | JNDI adının tam **`jdbc/testPSQL`** olduğundan ve PostgreSQL JAR’ın domain `lib` altında olduğundan emin olun. |
-| Giriş sonrası 404 | Deploy **context path**’ini kontrol edin (`/accounting` vs `/`). |
+| Giriş sonrası 404 | Docker’da kök: `/login.xhtml`. Yerel deploy’da context `/accounting` olabilir. |
 
 ---
 

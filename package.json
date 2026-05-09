@@ -1,0 +1,12 @@
+{
+  "name": "jakarta-accounting-project",
+  "private": true,
+  "description": "Docker ile DB + Payara tek komutta (pnpm dev / npm run dev)",
+  "scripts": {
+    "dev": "docker compose up --build -d",
+    "dev:db": "docker compose -f docker-compose.dev.yaml up -d",
+    "down": "docker compose down",
+    "down:v": "docker compose down -v",
+    "logs": "docker compose logs -f app"
+  }
+}
